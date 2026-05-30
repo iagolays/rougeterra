@@ -8,6 +8,7 @@ import { InventorySlot } from "../UI";
 import { REGIONS } from "../../data/regions";
 import RuneterraMap from "./RuneterraMap";
 import InfoPanel from "../InfoPanel";
+import { playSfx } from "../../game/sfx";
 import styles from "./Map.module.css";
 
 // Static Runeterra map regions with approximate positions (% of image)
@@ -169,7 +170,13 @@ export default function Map() {
                 const ab = player.champion.abilities.find(a => a.key === key);
                 if (!ab) return null;
                 return (
-                  <button key={key} className={styles.unlockOption} onClick={() => unlockAbility(key)}>
+                  <button
+                    key={key}
+                    className={styles.unlockOption}
+                    onMouseDown={() => playSfx("levelup_click", 0.6)}
+                    onMouseUp={() => playSfx("levelup_release", 0.6)}
+                    onClick={() => unlockAbility(key)}
+                  >
                     {player.champion.abilityImages?.[key]
                       ? <img src={player.champion.abilityImages[key]} alt={key} className={styles.unlockIcon} />
                       : <div className={`key-tag key-${key.toLowerCase()}`}>{key}</div>

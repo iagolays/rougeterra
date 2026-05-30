@@ -34,7 +34,7 @@ export const ACHIEVEMENTS = [
   { id: "olvidadizo",   name: "Olvidadizo",      emoji: "🧠", desc: "Abre el panel de información 10 veces en una sola partida.", hidden: true, check: c => c.runInfoOpens >= 10 },
   { id: "adicto",       name: "Adicto",          emoji: "🧪", desc: "Usa 30 pociones de maná en una partida.",             check: c => c.runManaPotionsUsed >= 30 },
   { id: "superviviente", name: "Superviviente",  emoji: "❤️‍🩹", desc: "Sobrevive a un combate con menos del 10% de vida." },
-  { id: "moggeador",    name: "Moggeador",       emoji: "⏳", desc: "Gana un combate que dure 10 turnos o más." },
+  { id: "moggeador",    name: "Moggeador",       emoji: "⏳", desc: "Pasa el turno 10 veces seguidas y luego gana el combate." },
   { id: "hall_fama",    name: "Hall de la Fama", emoji: "🏆", desc: "Derrota al Jefe del Vacío." },
 ];
 

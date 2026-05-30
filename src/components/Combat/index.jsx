@@ -12,6 +12,7 @@ import { useGameStore } from "../../store/gameStore";
 import { StatBar, EffectBadges, InventorySlot } from "../UI";
 import styles from "./Combat.module.css";
 import { REGIONS } from "../../data/regions";
+import { playSfx } from "../../game/sfx";
 
 // Map enemy ids to DDragon champion names for splash art
 const ENEMY_IMAGE_MAP = {
@@ -305,7 +306,13 @@ export default function Combat() {
                 const ab = player.champion.abilities.find(a => a.key === key);
                 if (!ab) return null;
                 return (
-                  <button key={key} className={styles.unlockOption} onClick={() => unlockAbility(key)}>
+                  <button
+                    key={key}
+                    className={styles.unlockOption}
+                    onMouseDown={() => playSfx("levelup_click", 0.6)}
+                    onMouseUp={() => playSfx("levelup_release", 0.6)}
+                    onClick={() => unlockAbility(key)}
+                  >
                     {player.champion.abilityImages?.[key]
                       ? <img src={player.champion.abilityImages[key]} alt={key} className={styles.unlockIcon} />
                       : <div className={`key-tag key-${key.toLowerCase()}`}>{key}</div>

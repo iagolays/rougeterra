@@ -32,6 +32,17 @@ const SECTIONS = [
     ],
   },
   {
+    title: "Sonidos",
+    items: [
+      {
+        text: "Efectos de sonido de subida de nivel y de reaparición extraídos del archivo de sonidos de League of Legends recopilado por Spectral Coding.",
+        url: "https://wiki.spectralcoding.com/info:league_of_legends_sounds:league_of_legends_sounds",
+        label: "Spectral Coding — League of Legends Sounds",
+      },
+      { text: "Sonido de logro de estilo Steam." },
+    ],
+  },
+  {
     title: "Otros recursos",
     items: [
       { text: "Iconos de interfaz (moneda, ping) procedentes de CommunityDragon.", url: "https://www.communitydragon.org/", label: "CommunityDragon" },

@@ -14,6 +14,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { ACHIEVEMENTS } from "../data/achievements";
+import { playSfx } from "../game/sfx";
 import { REGIONS, getDifficultyScaledEnemy } from "../data/regions";
 import { CHAMPION_CONFIGS, mergeChampionData } from "../data/championsConfig";
 import {
@@ -503,6 +504,7 @@ export const useGameStore = create(
       tutorialStep:         tutorialDone ? null : 0,
       screen:               "map",
     });
+    playSfx("respawn", 0.5);
   },
 
   // ─── ABILITY UNLOCK ───────────────────────────────────────────────────────
@@ -628,7 +630,8 @@ export const useGameStore = create(
     }
 
     const activeEnemy = enemies[activeEnemyIdx];
-    const { player: p2, combat: c2, enemy: e2, log } = applyPlayerAbility(ability, player, combatCtx, activeEnemy);
+    let { player: p2, combat: c2, enemy: e2, log } = applyPlayerAbility(ability, player, combatCtx, activeEnemy);
+    c2 = { ...c2, consecutivePasses: 0 }; // using an ability breaks the pass streak
 
     // Saitama — kill an enemy from full HP in a single hit
     if (activeEnemy.currentHp >= activeEnemy.scaledStats.hp && e2.currentHp <= 0) {
@@ -703,9 +706,16 @@ export const useGameStore = create(
     const { player, combatCtx } = get();
     if (!combatCtx || combatCtx.turn !== "player" || combatCtx.over) return;
     const { player: p2, log } = passTurnPure(player);
+    const passes = (combatCtx.consecutivePasses || 0) + 1;
     set({
       player:    p2,
-      combatCtx: { ...combatCtx, turn: "enemy", turnCount: combatCtx.turnCount + 1 },
+      combatCtx: {
+        ...combatCtx,
+        turn: "enemy",
+        turnCount: combatCtx.turnCount + 1,
+        consecutivePasses: passes,
+        moggeadorReady: combatCtx.moggeadorReady || passes >= 10,
+      },
       combatLog: [...get().combatLog, ...log],
     });
     setTimeout(() => get()._runEnemyTurn(), 700);
@@ -742,7 +752,7 @@ export const useGameStore = create(
       const usedManaPotion = isManaPotion(item);
       return {
         player:    p,
-        combatCtx: { ...ctx, turn: "enemy", turnCount: ctx.turnCount + 1 },
+        combatCtx: { ...ctx, turn: "enemy", turnCount: ctx.turnCount + 1, consecutivePasses: 0 },
         combatLog: [...state.combatLog, { type: "system", text: parts.join(" | ") }],
         runManaPotionsUsed: state.runManaPotionsUsed + (usedManaPotion ? 1 : 0),
       };
@@ -855,7 +865,7 @@ export const useGameStore = create(
 
     // ── Moment-based achievements on victory ──
     if (newHp > 0 && newHp < player.maxHp * 0.1) get().unlockAchievement("superviviente");
-    if ((combat.turnCount || 0) >= 10) get().unlockAchievement("moggeador");
+    if (combat.moggeadorReady) get().unlockAchievement("moggeador");
     if (enemies.some(e => e.id === "void_watcher")) get().unlockAchievement("hall_fama");
     get()._checkAchievements(); // Cain (runGoldEarned) + any threshold reached
 
@@ -875,6 +885,7 @@ export const useGameStore = create(
     // Check unlock before proceeding
     if (combatCtx?.pendingUnlock) {
       set({ pendingUnlock: combatCtx.pendingUnlock, combatCtx: { ...combatCtx, pendingUnlock: null } });
+      playSfx("levelup", 0.55); // ability-choice panel appears
       return;
     }
 

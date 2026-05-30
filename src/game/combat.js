@@ -538,6 +538,9 @@ export function initCombat(playerState, enemyTemplate) {
       // Akali delayed-damage channels
       akaliEPending: null,   // { dmg: number, turnsLeft: number }
       akaliRPending: null,   // { adMult, apMult, missingHpScale, turnsLeft }
+      // Moggeador achievement: consecutive "pass turn" presses
+      consecutivePasses: 0,
+      moggeadorReady: false,
       log: [{ type: "system", text: `⚔️ **Combat begins** vs **${enemyTemplate.name}** — HP: ${enemyTemplate.currentHp} | AD: ${enemyTemplate.scaledStats?.ad}` }],
     },
   };

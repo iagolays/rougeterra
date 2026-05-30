@@ -35,7 +35,7 @@ const SECTIONS = [
     title: "Sonidos",
     items: [
       {
-        text: "Efectos de sonido de subida de nivel y de reaparición extraídos del archivo de sonidos de League of Legends recopilado por Spectral Coding.",
+        text: "Todos los efectos de sonido relacionados con League of Legends (subida de nivel, reaparición, curación, etc.) provienen del archivo de sonidos recopilado por Spectral Coding.",
         url: "https://wiki.spectralcoding.com/info:league_of_legends_sounds:league_of_legends_sounds",
         label: "Spectral Coding — League of Legends Sounds",
       },

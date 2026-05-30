@@ -2,7 +2,7 @@
 
 > Roguelike por turnos ambientado en Runeterra — fan game de League of Legends
 
-🎮 **[Jugar ahora → rougeterra.vercel.app](https://rougeterra.vercel.app)**
+🎮 **[Jugar ahora → rogueterra.vercel.app](https://rogueterra.vercel.app)**
 
 ---
 

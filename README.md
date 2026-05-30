@@ -8,7 +8,7 @@
 
 ## ¿Qué es RogueTerra?
 
-RogueTerra es un juego de rol roguelike por turnos inspirado en el universo de League of Legends. Elige un campeón, recorre 6 regiones de Runeterra, derrota enemigos, consigue objetos y enfréntate al poder del Vacío.
+RogueTerra es un roguelike por turnos inspirado en el universo de League of Legends. Elige un campeón, recorre 6 regiones de Runeterra, derrota enemigos, consigue objetos y enfréntate al poder del Vacío.
 
 Cada partida es única: los enemigos escalan con la dificultad, la tienda cambia tras cada combate, y las habilidades se desbloquean progresivamente según avanzas.
 
@@ -27,8 +27,8 @@ Cada partida es única: los enemigos escalan con la dificultad, la tienda cambia
 | Campeón | Recurso | Estilo | Mecánica única |
 |---|---|---|---|
 | **Darius** | Ninguno | Bruiser cuerpo a cuerpo | Sistema de marcas Hemorragia: Q/W/E apilan marcas (máx 3). La R consume todas y añade +40% de daño por marca |
-| **Ashe** | Maná | Tiradora a distancia | Volley golpea a todos los enemigos; Flecha de cristal encantada aturde 3 turnos |
-| **Akali** | Energía | Asesina mixta | Lanzamiento de shuriken detona ¼ del daño tras 2 turnos; Ejecución perfecta tiene 2 partes — la Parte 2 escala con la vida que le falta al enemigo |
+| **Ashe** | Maná | Tiradora a distancia | Q golpea a todos los enemigos; R aturde 3 turnos |
+| **Akali** | Energía | Asesina mixta | E ¼ del daño tras 2 turnos; R tiene 2 partes — la Parte 2 escala con la vida que le falta al enemigo |
 
 ---
 
@@ -204,7 +204,7 @@ Los assets (imágenes, datos) pertenecen a Riot Games y se usan bajo su polític
 ---
 
 <div align="center">
-  Hecho con ❤️ por fans de League of Legends
+  Un intento de roguelike
   <br/>
   <a href="https://rougeterra.vercel.app">🎮 Jugar</a> ·
   <a href="https://github.com/iagolays/rougeterra/issues">🐛 Reportar bug</a> ·

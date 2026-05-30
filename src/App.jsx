@@ -11,6 +11,7 @@ import Reward         from "./components/Reward";
 import Event          from "./components/Event";
 import GameOver       from "./components/GameOver";
 import Victory        from "./components/Victory";
+import TutorialCard   from "./components/Tutorial/TutorialCard";
 
 export default function App() {
   const { screen, dataLoaded, dataError, loadData } = useGameStore();
@@ -19,17 +20,25 @@ export default function App() {
 
   if (!dataLoaded) return <LoadingScreen />;
 
+  let Page;
   switch (screen) {
-    case "home":        return <Home />;
-    case "patchnotes":  return <PatchNotes />;
-    case "select":      return <ChampionSelect />;
-    case "map":         return <Map />;
-    case "combat":      return <Combat />;
-    case "shop":        return <Shop />;
-    case "reward":      return <Reward />;
-    case "event":       return <Event />;
-    case "gameover":    return <GameOver />;
-    case "victory":     return <Victory />;
-    default:            return <LoadingScreen error={dataError} />;
+    case "home":        Page = <Home />;         break;
+    case "patchnotes":  Page = <PatchNotes />;   break;
+    case "select":      Page = <ChampionSelect />; break;
+    case "map":         Page = <Map />;           break;
+    case "combat":      Page = <Combat />;        break;
+    case "shop":        Page = <Shop />;          break;
+    case "reward":      Page = <Reward />;        break;
+    case "event":       Page = <Event />;         break;
+    case "gameover":    Page = <GameOver />;      break;
+    case "victory":     Page = <Victory />;       break;
+    default:            Page = <LoadingScreen error={dataError} />; break;
   }
+
+  return (
+    <>
+      {Page}
+      <TutorialCard />
+    </>
+  );
 }

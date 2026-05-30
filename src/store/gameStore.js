@@ -12,6 +12,7 @@
  */
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { REGIONS, getDifficultyScaledEnemy } from "../data/regions";
 import { CHAMPION_CONFIGS, mergeChampionData } from "../data/championsConfig";
 import {
@@ -360,7 +361,9 @@ export function getRandomEvent() {
 }
 
 // ─── STORE ────────────────────────────────────────────────────────────────────
-export const useGameStore = create((set, get) => ({
+export const useGameStore = create(
+  persist(
+    (set, get) => ({
   championsData: null,
   itemsData:     null,
   dataLoaded:    false,
@@ -385,8 +388,12 @@ export const useGameStore = create((set, get) => ({
 
   shopItems:     [],
   rewardItems:   [],
-  acquiredLegendaryIds: [],   // legendary items already obtained this run
+  acquiredLegendaryIds: [],
   combatLog:     [],
+
+  // Tutorial (0-8 = step index, null = not active)
+  tutorialStep: null,
+  tutorialDone: false,
 
   // Event modal
   pendingEvent:  null,
@@ -425,7 +432,7 @@ export const useGameStore = create((set, get) => ({
 
   // ─── CHAMPION SELECT ──────────────────────────────────────────────────────
   selectChampion: (champion) => {
-    const { itemsData } = get();
+    const { itemsData, tutorialDone } = get();
     set({
       player:        buildBasePlayer(champion),
       gold:          100,
@@ -438,6 +445,7 @@ export const useGameStore = create((set, get) => ({
       pendingUnlock: ["Q", "W", "E"],
       shopItems:            buildShopStock(itemsData, champion.resource),
       acquiredLegendaryIds: [],
+      tutorialStep:         tutorialDone ? null : 0,
       screen:               "map",
     });
   },
@@ -875,6 +883,46 @@ export const useGameStore = create((set, get) => ({
   goToSelect:     () => set({ screen: "select" }),
   goToPatchNotes: () => set({ screen: "patchnotes" }),
 
+  continueRun: () => set({ screen: "map" }),
+
+  startNewRun: () => {
+    const { championsData, bank } = get();
+    set({
+      player: null, gold: 100, bank,
+      regionIdx: 0, combatIndex: 0,
+      totalCombats: 0, totalKills: 0, totalDamage: 0, winStreak: 0,
+      combatCtx: null, enemies: [], combatLog: [],
+      pendingEvent: null, pendingUnlock: null,
+      acquiredLegendaryIds: [], shopItems: [], rewardItems: [],
+      champPool: championsData ? pickChampionPool(Object.values(championsData)) : [],
+      screen: "select",
+    });
+  },
+
+  advanceTutorial: () => {
+    const { tutorialStep } = get();
+    if (tutorialStep === null) return;
+    const next = tutorialStep + 1;
+    if (next >= 9) {
+      set({ tutorialStep: null, tutorialDone: true });
+    } else {
+      set({ tutorialStep: next });
+    }
+  },
+
+  skipTutorial: () => set({ tutorialStep: null, tutorialDone: true }),
+
+  replayTutorial: () => {
+    const { player } = get();
+    if (player) {
+      // Active run: replay the guided tutorial over the current map
+      set({ tutorialStep: 0, screen: "map" });
+    } else {
+      // No run yet: mark it pending so it shows when the next run starts
+      set({ tutorialDone: false, screen: "select" });
+    }
+  },
+
   restartGame: () => {
     const { championsData } = get();
     set({
@@ -887,4 +935,25 @@ export const useGameStore = create((set, get) => ({
   },
 
   _setState: (updates) => set(updates),
-}));
+    }),
+    {
+      name: "rougeterra-v1",
+      partialize: (state) => ({
+        player:               state.player,
+        gold:                 state.gold,
+        bank:                 state.bank,
+        regionIdx:            state.regionIdx,
+        combatIndex:          state.combatIndex,
+        shopItems:            state.shopItems,
+        rewardItems:          state.rewardItems,
+        acquiredLegendaryIds: state.acquiredLegendaryIds,
+        totalKills:           state.totalKills,
+        totalCombats:         state.totalCombats,
+        totalDamage:          state.totalDamage,
+        winStreak:            state.winStreak,
+        tutorialStep:         state.tutorialStep,
+        tutorialDone:         state.tutorialDone,
+      }),
+    }
+  )
+);

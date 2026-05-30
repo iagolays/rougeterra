@@ -137,6 +137,57 @@
 
 .btnIcon { font-size: 20px; }
 
+/* Secondary "New Game" button */
+.btnTertiary {
+  width: 100%;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.18s;
+}
+.btnTertiary:hover { color: var(--text-dim); }
+
+/* Save card */
+.saveCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  width: 100%;
+  max-width: 280px;
+}
+.saveIcon { font-size: 28px; flex-shrink: 0; width: 44px; height: 44px; align-items: center; justify-content: center; }
+.saveAvatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold-400); flex-shrink: 0; }
+.saveInfo { display: flex; flex-direction: column; gap: 2px; }
+.saveName { font-family: var(--font-display); font-size: 14px; color: var(--text-bright); }
+.saveMeta { font-size: 11px; color: var(--text-dim); }
+
+/* Confirm modal */
+.confirmOverlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 20px;
+}
+.confirmModal {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-400);
+  border-radius: var(--radius-lg);
+  padding: 24px; max-width: 340px; width: 100%;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.confirmTitle { font-family: var(--font-display); font-size: 18px; color: var(--gold-400); }
+.confirmText  { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+.confirmBtns  { display: flex; gap: 10px; justify-content: flex-end; }
+
 /* ── Bank hint ─────────────────────────────────────────────────────────────── */
 .bankHint {
   font-family: var(--font-display);

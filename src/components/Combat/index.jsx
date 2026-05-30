@@ -53,7 +53,11 @@ export default function Combat() {
     useAbility, passTurn: storePassTurn, useConsumable,
     proceedAfterCombat, setActiveEnemy,
     unlockAbility, dismissUnlock, pendingUnlock,
+    tutorialStep,
   } = useGameStore();
+
+  // Combat tutorial targets: 5=enemyArea 6=playerPanel 7=controls 8=logWrap
+  const hl = (step) => tutorialStep === step ? "tutorial-highlight" : "";
 
   const logRef = useRef(null);
 
@@ -88,7 +92,7 @@ export default function Combat() {
       </div>
 
       {/* ── ENEMY AREA ──────────────────────────────────────────────────── */}
-      <div className={styles.enemyArea}>
+      <div className={`${styles.enemyArea} ${hl(5)}`}>
         {enemies.map((enemy, idx) => {
           const isActive = idx === activeEnemyIdx;
           const isDead   = enemy.currentHp <= 0;
@@ -144,7 +148,7 @@ export default function Combat() {
       </div>
 
       {/* ── PLAYER PANEL ────────────────────────────────────────────────── */}
-      <div className={styles.playerPanel}>
+      <div className={`${styles.playerPanel} ${hl(6)}`}>
 
         {/* Row: icon + name + effects */}
         <div className={styles.playerPanelTop}>
@@ -221,7 +225,7 @@ export default function Combat() {
       </div>
 
       {/* ── COMBAT LOG ──────────────────────────────────────────────────── */}
-      <div className={styles.logWrap} ref={logRef}>
+      <div className={`${styles.logWrap} ${hl(8)}`} ref={logRef}>
         {combatLog.map((entry, i) => {
           const dmgClass = entry.dmgType === "magic" ? styles.logMagic : entry.dmgType === "true" ? styles.logTrue : entry.dmgType === "physical" ? styles.logPhysical : "";
           return (
@@ -234,7 +238,7 @@ export default function Combat() {
 
       {/* ── ABILITY BAR ─────────────────────────────────────────────────── */}
       {!combatCtx.over && (
-        <div className={styles.controls}>
+        <div className={`${styles.controls} ${hl(7)}`}>
           <div className={styles.turnLine}>
             {isPlayerTurn ? "⚔️ Your turn" : "⏳ Enemy turn…"}
             {isPlayerTurn && activeEnemy && <span className={styles.targetLine}> — targeting {activeEnemy.name}</span>}

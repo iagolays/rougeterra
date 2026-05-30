@@ -32,10 +32,14 @@ export default function Map() {
   const {
     player, gold, bank, regionIdx, combatIndex, totalKills, winStreak,
     chooseDestination, pendingUnlock, unlockAbility, dismissUnlock,
+    tutorialStep,
   } = useGameStore();
   const [varDest]    = useState(() => DEST_VARIABLE[Math.floor(Math.random() * DEST_VARIABLE.length)]);
   const [showInfo, setShowInfo] = useState(false);
-  const [infoTab, setInfoTab]   = useState("abilities"); // "abilities" | "items"
+  const [infoTab, setInfoTab]   = useState("abilities");
+
+  // Map tutorial targets: 0=champBar 1=inventoryWrap 2=mapArea 3=combatProgress 4=bottomNav
+  const hl = (step) => tutorialStep === step ? "tutorial-highlight" : "";
 
   const region = REGIONS[regionIdx];
   if (!player) return null;
@@ -48,7 +52,7 @@ export default function Map() {
     <div className={styles.screen}>
 
       {/* ── TOP: Champion status bar ─────────────────────────────────────── */}
-      <div className={styles.champBar}>
+      <div className={`${styles.champBar} ${hl(0)}`}>
         <div className={styles.champBarLeft}>
           {player.champion.iconUrl
             ? <img src={player.champion.iconUrl} alt={player.champion.name} className={styles.champIcon} onError={e => e.target.style.display="none"} />
@@ -94,7 +98,7 @@ export default function Map() {
       </div>
 
       {/* ── INVENTORY LoL-style ──────────────────────────────────────────── */}
-      <div className={styles.inventoryWrap}>
+      <div className={`${styles.inventoryWrap} ${hl(1)}`}>
         <div className={styles.inventorySlots}>
           {Array.from({ length: 6 }).map((_, i) => (
             <InventorySlot key={i} item={player.inventory?.[i]} index={i} />
@@ -109,13 +113,15 @@ export default function Map() {
       </div>
 
       {/* ── MAP CENTER ──────────────────────────────────────────────────── */}
-      <RuneterraMap
-        currentRegionId={region.id}
-        nextRegionId={REGIONS[regionIdx + 1]?.id}
-      />
+      <div className={`${styles.mapArea} ${hl(2)}`}>
+        <RuneterraMap
+          currentRegionId={region.id}
+          nextRegionId={REGIONS[regionIdx + 1]?.id}
+        />
+      </div>
 
       {/* ── COMBAT PROGRESS ─────────────────────────────────────────────── */}
-      <div className={styles.combatProgress}>
+      <div className={`${styles.combatProgress} ${hl(3)}`}>
         <span className={styles.progressRegion}>{region.emoji} {region.name}</span>
         <div className={styles.progressDots}>
           {Array.from({ length: region.combatsPerRegion }).map((_, i) => (
@@ -131,7 +137,7 @@ export default function Map() {
       </div>
 
       {/* ── BOTTOM NAV ──────────────────────────────────────────────────── */}
-      <nav className={styles.bottomNav}>
+      <nav className={`${styles.bottomNav} ${hl(4)}`}>
         {/* Left: variable (rest or event) */}
         <button className={`${styles.navBtn} ${styles.navBtnSecondary}`} onClick={() => chooseDestination(varDest.id)}>
           <NavIcon dest={varDest} big={false} />

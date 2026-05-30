@@ -277,6 +277,20 @@ h3 { font-size: 1rem; font-weight: 600; color: var(--text-base); letter-spacing:
 }
 [data-tooltip]:hover::after { opacity: 1; }
 
+/* ─── TUTORIAL HIGHLIGHT ─────────────────────────────────────────────────── */
+.tutorial-highlight {
+  position: relative;
+  z-index: 50 !important;
+  outline: 3px solid var(--gold-400);
+  outline-offset: 2px;
+  border-radius: 6px;
+  animation: tutorialGlow 1.4s ease-in-out infinite;
+}
+@keyframes tutorialGlow {
+  0%, 100% { outline-color: var(--gold-400); }
+  50%       { outline-color: rgba(200,155,60,0.4); }
+}
+
 /* ─── UTILS ──────────────────────────────────────────────────────────────── */
 .text-gold   { color: var(--gold-400); }
 .text-bright { color: var(--text-bright); }

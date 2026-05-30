@@ -4,6 +4,30 @@ import styles from "./PatchNotes.module.css";
 
 const PATCHES = [
   {
+    version: "v0.3 — Tutorial & Guardado",
+    date: "May 2026",
+    sections: [
+      {
+        title: "Novedades",
+        items: [
+          "Tutorial interactivo: al empezar tu primera partida, una guía paso a paso resalta cada parte de la interfaz (estado, inventario, mapa, combate) con su explicación.",
+          "Botón 'Ver Tutorial' en el menú principal para repetir la guía cuando quieras.",
+          "Guardado automático: tu progreso se guarda en el navegador. Si recargas la página puedes pulsar 'Continuar Partida' desde el menú principal.",
+          "El menú principal muestra una tarjeta con tu campeón actual, región, HP y oro cuando hay una partida en curso.",
+          "Botón 'Nueva Partida' con confirmación para no perder el progreso por accidente (el oro del banco siempre se conserva).",
+        ],
+      },
+      {
+        title: "Correcciones",
+        items: [
+          "El tutorial ya no se solapa con el panel de selección de habilidad al empezar la partida — espera a que elijas.",
+          "Las tarjetas del tutorial que explican elementos de la parte inferior (destinos, habilidades de combate) ahora aparecen en la parte superior para no taparlos.",
+          "En 'Continuar Partida' se muestra la foto del campeón en lugar de un emoji.",
+        ],
+      },
+    ],
+  },
+  {
     version: "v0.2 — Hotfix & Polish",
     date: "May 2026",
     sections: [

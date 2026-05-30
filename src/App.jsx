@@ -13,6 +13,9 @@ import GameOver       from "./components/GameOver";
 import Victory        from "./components/Victory";
 import TutorialCard   from "./components/Tutorial/TutorialCard";
 import Jumpscare      from "./components/Jumpscare";
+import Achievements   from "./components/Achievements";
+import AchievementToast from "./components/Achievements/AchievementToast";
+import Credits        from "./components/Credits";
 
 export default function App() {
   const { screen, dataLoaded, dataError, loadData } = useGameStore();
@@ -23,8 +26,10 @@ export default function App() {
 
   let Page;
   switch (screen) {
-    case "home":        Page = <Home />;         break;
-    case "patchnotes":  Page = <PatchNotes />;   break;
+    case "home":         Page = <Home />;          break;
+    case "patchnotes":   Page = <PatchNotes />;    break;
+    case "achievements": Page = <Achievements />;  break;
+    case "credits":      Page = <Credits />;       break;
     case "select":      Page = <ChampionSelect />; break;
     case "map":         Page = <Map />;           break;
     case "combat":      Page = <Combat />;        break;
@@ -41,6 +46,7 @@ export default function App() {
       {Page}
       <TutorialCard />
       <Jumpscare />
+      <AchievementToast />
     </>
   );
 }

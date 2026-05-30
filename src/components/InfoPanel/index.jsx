@@ -22,16 +22,22 @@ function fmtStat(k, v) {
  */
 export default function InfoPanel({ className = "" }) {
   const player = useGameStore(s => s.player);
+  const registerInfoOpen = useGameStore(s => s.registerInfoOpen);
   const [open, setOpen] = useState(false);
   const [tab, setTab]   = useState("abilities");
 
   if (!player) return null;
 
+  const handleOpen = () => {
+    setOpen(true);
+    registerInfoOpen();
+  };
+
   return (
     <>
       <button
         className={`${styles.trigger} ${className}`}
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         title="Ver habilidades, objetos y estados"
       >
         ℹ

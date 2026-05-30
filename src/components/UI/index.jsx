@@ -245,7 +245,7 @@ export function GameHeader({ player, gold, bank, regionName, rightContent }) {
 
   return (
     <header className="game-header">
-      <span className={styles.headerLogo}>⚔ RUNETERRA</span>
+      <span className={styles.headerLogo}>⚔ ROGUETERRA</span>
       <div className={styles.headerStats}>
         <div className={styles.hstat}>
           <span className={styles.hstatLabel}>❤️</span>

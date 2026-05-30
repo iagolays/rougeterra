@@ -13,6 +13,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { ACHIEVEMENTS } from "../data/achievements";
 import { REGIONS, getDifficultyScaledEnemy } from "../data/regions";
 import { CHAMPION_CONFIGS, mergeChampionData } from "../data/championsConfig";
 import {
@@ -49,10 +50,18 @@ function isLegendary(item) {
   return !item.consumable && (item.gold?.total || 0) >= LEGENDARY_THRESHOLD;
 }
 
+function isCollectable(item) {
+  return item.gold?.purchasable && item.gold?.total > 0 && !item.consumable &&
+    Object.keys(item.stats || {}).length > 0;
+}
+
+function collectableItemIds(allItems) {
+  return Object.values(allItems || {}).filter(isCollectable).map(i => i.id);
+}
+
 function pickShopItems(allItems, excludeIds = new Set()) {
   const eligible = Object.values(allItems).filter(i =>
-    i.gold.purchasable && i.gold.total > 0 && !i.consumable &&
-    Object.keys(i.stats).length > 0 && !excludeIds.has(i.id)
+    isCollectable(i) && !excludeIds.has(i.id)
   );
   return shuffle(eligible).slice(0, 6);
 }
@@ -418,6 +427,17 @@ export const useGameStore = create(
   // Bank transactions left this run
   bankUsesLeft: 2,
 
+  // ─── ACHIEVEMENTS ─────────────────────────────────────────────────────────
+  unlockedAchievements: [],   // account-wide (persisted)
+  achievementQueue:     [],   // ids pending to show as toast
+  collectedItemIds:     [],   // account-wide set of equipment ids ever collected
+  collectableTotal:     0,    // total collectable items (computed on data load)
+  // per-run counters
+  runRested:          false,
+  runGoldEarned:      0,
+  runInfoOpens:       0,
+  runManaPotionsUsed: 0,
+
   // Tutorial (0-8 = step index, null = not active)
   tutorialStep: null,
   tutorialDone: false,
@@ -445,6 +465,7 @@ export const useGameStore = create(
         dataLoaded: true,
         screen: "home",
         champPool: pickChampionPool(Object.values(merged)),
+        collectableTotal: collectableItemIds(itemsJson).length,
       });
     } catch (err) {
       console.warn("Data files not found:", err.message);
@@ -475,6 +496,10 @@ export const useGameStore = create(
       sideDest:             pickSideDest(),
       sideDestUsed:         false,
       bankUsesLeft:         BANK_USES_PER_RUN,
+      runRested:            false,
+      runGoldEarned:        0,
+      runInfoOpens:         0,
+      runManaPotionsUsed:   0,
       tutorialStep:         tutorialDone ? null : 0,
       screen:               "map",
     });
@@ -529,6 +554,7 @@ export const useGameStore = create(
           mp: state.player.resource !== "none" ? state.player.maxMp : state.player.mp,
         },
         sideDestUsed: true,
+        runRested: true,
         screen: "map",
       };
     });
@@ -603,6 +629,11 @@ export const useGameStore = create(
 
     const activeEnemy = enemies[activeEnemyIdx];
     const { player: p2, combat: c2, enemy: e2, log } = applyPlayerAbility(ability, player, combatCtx, activeEnemy);
+
+    // Saitama — kill an enemy from full HP in a single hit
+    if (activeEnemy.currentHp >= activeEnemy.scaledStats.hp && e2.currentHp <= 0) {
+      get().unlockAchievement("saitama");
+    }
 
     // If ult used, reset charge
     const newUltCharge = abilityKey === "R" ? 0 : p2.ultCharge;
@@ -707,12 +738,16 @@ export const useGameStore = create(
         if (!removed && c.id === item.id) { removed = true; return false; }
         return true;
       });
+      // Track mana-potion usage for the "Adicto" achievement
+      const usedManaPotion = isManaPotion(item);
       return {
         player:    p,
         combatCtx: { ...ctx, turn: "enemy", turnCount: ctx.turnCount + 1 },
         combatLog: [...state.combatLog, { type: "system", text: parts.join(" | ") }],
+        runManaPotionsUsed: state.runManaPotionsUsed + (usedManaPotion ? 1 : 0),
       };
     });
+    get()._checkAchievements();
     setTimeout(() => get()._runEnemyTurn(), 700);
   },
 
@@ -751,7 +786,20 @@ export const useGameStore = create(
       return;
     }
 
-    set({ player: currentPlayer, enemies: currentEnemies, combatCtx: { ...currentCtx, turn: "player" }, combatLog: currentLog });
+    // Enemies may have died to bleed / delayed damage / counters during their turn
+    const aliveAfter = currentEnemies.filter(e => e.currentHp > 0);
+    if (aliveAfter.length === 0) {
+      const result = get()._handleVictory(currentPlayer, currentCtx, currentEnemies, currentLog);
+      set({ player: result.player, combatCtx: result.combat, enemies: result.enemies, activeEnemyIdx: 0, combatLog: result.log });
+      return;
+    }
+
+    // Make sure the active target is a living enemy when control returns to the player
+    const nextActive = currentEnemies[activeEnemyIdx]?.currentHp > 0
+      ? activeEnemyIdx
+      : currentEnemies.findIndex(e => e.currentHp > 0);
+
+    set({ player: currentPlayer, enemies: currentEnemies, activeEnemyIdx: nextActive, combatCtx: { ...currentCtx, turn: "player" }, combatLog: currentLog });
   },
 
   _handleVictory: (player, combat, enemies, logBase) => {
@@ -798,11 +846,18 @@ export const useGameStore = create(
     ];
 
     get()._setState({
-      gold:         get().gold + totalGold + streakBonus,
-      totalKills:   totalKills + enemies.length,
-      totalCombats: totalCombats + 1,
-      winStreak:    newWinStreak,
+      gold:          get().gold + totalGold + streakBonus,
+      totalKills:    totalKills + enemies.length,
+      totalCombats:  totalCombats + 1,
+      winStreak:     newWinStreak,
+      runGoldEarned: get().runGoldEarned + totalGold + streakBonus,
     });
+
+    // ── Moment-based achievements on victory ──
+    if (newHp > 0 && newHp < player.maxHp * 0.1) get().unlockAchievement("superviviente");
+    if ((combat.turnCount || 0) >= 10) get().unlockAchievement("moggeador");
+    if (enemies.some(e => e.id === "void_watcher")) get().unlockAchievement("hall_fama");
+    get()._checkAchievements(); // Cain (runGoldEarned) + any threshold reached
 
     return {
       player:  { ...player, hp: newHp, combatsWon: newCombatsWon, ultCharge: Math.min(player.ultChargeMax, (player.ultCharge || 0)) },
@@ -838,6 +893,7 @@ export const useGameStore = create(
         return;
       }
       set({ regionIdx: regionIdx + 1, combatIndex: 0, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx + 1, excludeIds), shopItems: newShopItems, player: updatedPlayer, sideDest: pickSideDest(), sideDestUsed: false });
+      get()._checkAchievements(); // region/champion-based (reached new region)
     } else {
       set({ combatIndex: newCombatIndex, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx, excludeIds), shopItems: newShopItems, player: updatedPlayer, sideDest: pickSideDest(), sideDestUsed: false });
     }
@@ -852,8 +908,11 @@ export const useGameStore = create(
       const acquiredLegendaryIds = isLegendary(item)
         ? [...state.acquiredLegendaryIds, item.id]
         : state.acquiredLegendaryIds;
-      return { player: { ...updatedPlayer, itemSynergies: synergies }, acquiredLegendaryIds, screen: "map" };
+      const collectedItemIds = state.collectedItemIds.includes(item.id)
+        ? state.collectedItemIds : [...state.collectedItemIds, item.id];
+      return { player: { ...updatedPlayer, itemSynergies: synergies }, acquiredLegendaryIds, collectedItemIds, screen: "map" };
     });
+    get()._checkAchievements();
   },
 
   skipReward: () => set({ screen: "map" }),
@@ -867,8 +926,11 @@ export const useGameStore = create(
       const acquiredLegendaryIds = isLegendary(rewardItem)
         ? [...state.acquiredLegendaryIds, rewardItem.id]
         : state.acquiredLegendaryIds;
-      return { player: { ...updatedPlayer, itemSynergies: synergies }, acquiredLegendaryIds, screen: "map" };
+      const collectedItemIds = state.collectedItemIds.includes(rewardItem.id)
+        ? state.collectedItemIds : [...state.collectedItemIds, rewardItem.id];
+      return { player: { ...updatedPlayer, itemSynergies: synergies }, acquiredLegendaryIds, collectedItemIds, screen: "map" };
     });
+    get()._checkAchievements();
   },
 
   // ─── SHOP ─────────────────────────────────────────────────────────────────
@@ -895,8 +957,11 @@ export const useGameStore = create(
       const acquiredLegendaryIds = isLegendary(item)
         ? [...state.acquiredLegendaryIds, item.id]
         : state.acquiredLegendaryIds;
-      return { gold: newGold, shopItems: newShopItems, acquiredLegendaryIds, player: { ...updatedPlayer, itemSynergies: synergies } };
+      const collectedItemIds = state.collectedItemIds.includes(item.id)
+        ? state.collectedItemIds : [...state.collectedItemIds, item.id];
+      return { gold: newGold, shopItems: newShopItems, acquiredLegendaryIds, collectedItemIds, player: { ...updatedPlayer, itemSynergies: synergies } };
     });
+    get()._checkAchievements();
     return true;
   },
 
@@ -908,18 +973,65 @@ export const useGameStore = create(
       const inv = state.player.inventory.filter((_, i) => i !== inventoryIndex);
       const updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: inv }, inv);
       const synergies = computeItemSynergies(inv);
-      return { gold: state.gold + sellValue, player: { ...updatedPlayer, itemSynergies: synergies } };
+      return {
+        gold: state.gold + sellValue,
+        runGoldEarned: state.runGoldEarned + sellValue,
+        player: { ...updatedPlayer, itemSynergies: synergies },
+      };
     });
+    get()._checkAchievements();
   },
 
-  depositBank:  (amt) => { const { gold, bank, bankUsesLeft } = get(); if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, gold); if (a<=0) return false; set({ gold: gold-a, bank: bank+a, bankUsesLeft: bankUsesLeft-1 }); return true; },
+  depositBank:  (amt) => { const { gold, bank, bankUsesLeft } = get(); if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, gold); if (a<=0) return false; set({ gold: gold-a, bank: bank+a, bankUsesLeft: bankUsesLeft-1 }); get()._checkAchievements(); return true; },
   withdrawBank: (amt) => { const { gold, bank, bankUsesLeft } = get(); if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, bank); if (a<=0) return false; set({ gold: gold+a, bank: bank-a, bankUsesLeft: bankUsesLeft-1 }); return true; },
   leaveShop:    () => set({ screen: "map" }),
 
   // ─── GAME OVER / RESTART ──────────────────────────────────────────────────
-  goToHome:       () => set({ screen: "home" }),
-  goToSelect:     () => set({ screen: "select" }),
-  goToPatchNotes: () => set({ screen: "patchnotes" }),
+  goToHome:         () => set({ screen: "home" }),
+  goToSelect:       () => set({ screen: "select" }),
+  goToPatchNotes:   () => set({ screen: "patchnotes" }),
+  goToAchievements: () => set({ screen: "achievements" }),
+  goToCredits:      () => set({ screen: "credits" }),
+
+  // ─── ACHIEVEMENTS ─────────────────────────────────────────────────────────
+  unlockAchievement: (id) => {
+    const { unlockedAchievements, achievementQueue } = get();
+    if (unlockedAchievements.includes(id)) return;
+    set({
+      unlockedAchievements: [...unlockedAchievements, id],
+      achievementQueue: [...achievementQueue, id],
+    });
+  },
+
+  dismissAchievementToast: () => {
+    set(state => ({ achievementQueue: state.achievementQueue.slice(1) }));
+  },
+
+  registerInfoOpen: () => {
+    set(state => ({ runInfoOpens: state.runInfoOpens + 1 }));
+    get()._checkAchievements();
+  },
+
+  // Evaluate all state-derivable achievements and unlock any newly satisfied
+  _checkAchievements: () => {
+    const st = get();
+    const ctx = {
+      bank:               st.bank,
+      regionIdx:          st.regionIdx,
+      runRested:          st.runRested,
+      runGoldEarned:      st.runGoldEarned,
+      runInfoOpens:       st.runInfoOpens,
+      runManaPotionsUsed: st.runManaPotionsUsed,
+      championId:         st.player?.champion?.id,
+      collectedCount:     st.collectedItemIds.length,
+      totalItemCount:     st.collectableTotal,
+    };
+    for (const a of ACHIEVEMENTS) {
+      if (a.check && !st.unlockedAchievements.includes(a.id)) {
+        try { if (a.check(ctx)) get().unlockAchievement(a.id); } catch { /* ignore */ }
+      }
+    }
+  },
 
   continueRun: () => set({ screen: "map" }),
 
@@ -933,6 +1045,7 @@ export const useGameStore = create(
       pendingEvent: null, pendingUnlock: null,
       acquiredLegendaryIds: [], shopItems: [], rewardItems: [],
       sideDest: pickSideDest(), sideDestUsed: false, bankUsesLeft: BANK_USES_PER_RUN,
+      runRested: false, runGoldEarned: 0, runInfoOpens: 0, runManaPotionsUsed: 0,
       champPool: championsData ? pickChampionPool(Object.values(championsData)) : [],
       screen: "select",
     });
@@ -996,6 +1109,12 @@ export const useGameStore = create(
         bankUsesLeft:         state.bankUsesLeft,
         tutorialStep:         state.tutorialStep,
         tutorialDone:         state.tutorialDone,
+        unlockedAchievements: state.unlockedAchievements,
+        collectedItemIds:     state.collectedItemIds,
+        runRested:            state.runRested,
+        runGoldEarned:        state.runGoldEarned,
+        runInfoOpens:         state.runInfoOpens,
+        runManaPotionsUsed:   state.runManaPotionsUsed,
       }),
     }
   )

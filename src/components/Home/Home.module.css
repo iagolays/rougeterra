@@ -137,6 +137,34 @@
 
 .btnIcon { font-size: 20px; }
 
+/* Achievements — prominent button with golden glow */
+.btnAchievements {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, rgba(200,155,60,0.22), rgba(120,90,30,0.18));
+  border: 1px solid var(--gold-400);
+  border-radius: var(--radius-md);
+  color: var(--gold-100, #F0E6C8);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 16px rgba(200,155,60,0.2);
+}
+.btnAchievements:hover {
+  background: linear-gradient(135deg, rgba(200,155,60,0.35), rgba(120,90,30,0.28));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(200,155,60,0.45);
+}
+.btnAchievements:active { transform: translateY(0); }
+.btnAchievements .btnIcon { font-size: 22px; filter: drop-shadow(0 0 6px rgba(255,215,0,0.5)); }
+
 /* Secondary "New Game" button */
 .btnTertiary {
   width: 100%;

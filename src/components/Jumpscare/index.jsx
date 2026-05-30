@@ -8,6 +8,7 @@ const DURATION = 700; // ms on screen
 
 export default function Jumpscare() {
   const screen = useGameStore(s => s.screen);
+  const unlockAchievement = useGameStore(s => s.unlockAchievement);
   const [active, setActive] = useState(false);
   const prevScreen = useRef(screen);
   const timer = useRef(null);
@@ -17,6 +18,7 @@ export default function Jumpscare() {
       prevScreen.current = screen;
       if (Math.random() < CHANCE) {
         setActive(true);
+        unlockAchievement("afortunado"); // "Afortunado" — viste a Poppy
         clearTimeout(timer.current);
         timer.current = setTimeout(() => setActive(false), DURATION);
       }

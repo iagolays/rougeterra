@@ -4,7 +4,7 @@ import { REGIONS } from "../../data/regions";
 import styles from "./Home.module.css";
 
 export default function Home() {
-  const { player, gold, bank, regionIdx, goToPatchNotes, continueRun, startNewRun, goToSelect, replayTutorial } = useGameStore();
+  const { player, gold, bank, regionIdx, goToPatchNotes, continueRun, startNewRun, goToSelect, replayTutorial, goToAchievements, goToCredits } = useGameStore();
   const [confirmNew, setConfirmNew] = useState(false);
 
   const hasSave  = !!player;
@@ -33,7 +33,7 @@ export default function Home() {
         <div className={styles.titleBlock}>
           <div className={styles.eyebrow}>A RUNETERRA ROGUELIKE</div>
           <h1 className={styles.title}>RogueTerra</h1>
-          <div className={styles.version}>v0.4 Open Beta</div>
+          <div className={styles.version}>v0.5 Open Beta</div>
         </div>
 
         {/* Saved run info */}
@@ -78,6 +78,12 @@ export default function Home() {
             </button>
           )}
 
+          {/* Achievements — prominent */}
+          <button className={styles.btnAchievements} onClick={goToAchievements}>
+            <span className={styles.btnIcon}>🏆</span>
+            Logros
+          </button>
+
           {/* Patch notes if there's a save */}
           {hasSave && (
             <button className={styles.btnTertiary} onClick={goToPatchNotes}>
@@ -88,6 +94,11 @@ export default function Home() {
           {/* Replay tutorial */}
           <button className={styles.btnTertiary} onClick={replayTutorial}>
             📖 Ver Tutorial
+          </button>
+
+          {/* References / credits */}
+          <button className={styles.btnTertiary} onClick={goToCredits}>
+            📚 Referencias
           </button>
         </div>
 

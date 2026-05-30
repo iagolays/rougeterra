@@ -4,6 +4,35 @@ import styles from "./PatchNotes.module.css";
 
 const PATCHES = [
   {
+    version: "v0.5 — Logros",
+    date: "May 2026",
+    sections: [
+      {
+        title: "Sistema de logros",
+        items: [
+          "19 logros desbloqueables, accesibles desde el botón «Logros» del menú principal.",
+          "Aviso animado en pantalla cada vez que desbloqueas un logro.",
+          "Los logros ocultos aparecen como «???» hasta que los descubres.",
+          "Los logros y los objetos coleccionados se guardan entre partidas.",
+        ],
+      },
+      {
+        title: "Otros",
+        items: [
+          "Nueva pantalla «Referencias» con los créditos y el origen de todos los recursos (mapa, imágenes, tipografías).",
+          "El botón de Logros del menú principal es ahora más visible.",
+        ],
+      },
+      {
+        title: "Correcciones",
+        items: [
+          "CORREGIDO: si un enemigo moría por sangrado, daño diferido (Akali) o un contraataque, el combate se quedaba bloqueado y había que recargar. Ahora la victoria se detecta correctamente sin importar qué dé el golpe final.",
+          "Al volver al turno del jugador, el objetivo se reasigna automáticamente a un enemigo vivo.",
+        ],
+      },
+    ],
+  },
+  {
     version: "v0.4 — Objetos, Estados y Economía",
     date: "May 2026",
     sections: [

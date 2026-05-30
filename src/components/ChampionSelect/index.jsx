@@ -91,7 +91,7 @@ export default function ChampionSelect() {
       {/* ── HEADER ── */}
       <div className={styles.header}>
         <h1 className={styles.title}>CHAMP SELECT</h1>
-        <p className={styles.subtitle}>Choose your champion and begin the conquest.</p>
+        <p className={styles.subtitle}>Pickea tu champ y lanzate a lo desconocido.</p>
       </div>
 
       {/* ── CAROUSEL ── */}

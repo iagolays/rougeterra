@@ -380,9 +380,9 @@ export const useGameStore = create((set, get) => ({
   // ─── DATA LOADING ─────────────────────────────────────────────────────────
   loadData: async () => {
     try {
-      const [champJson, itemsJson] = await Promise.all([
-        fetch("/src/data/champions.json").then(r => { if (!r.ok) throw new Error("champions.json not found"); return r.json(); }),
-        fetch("/src/data/items.json").then(r => { if (!r.ok) throw new Error("items.json not found"); return r.json(); }),
+      const [{ default: champJson }, { default: itemsJson }] = await Promise.all([
+        import("../data/champions.json"),
+        import("../data/items.json"),
       ]);
       const merged = {};
       for (const [id, ddData] of Object.entries(champJson)) {

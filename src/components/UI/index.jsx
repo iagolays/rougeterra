@@ -114,29 +114,44 @@ export function AbilityButton({ ability, cooldown, resourceCurrent, disabled, on
 }
 
 // ─── ITEM CARD ─────────────────────────────────────────────────────────────────
+const STAT_META = {
+  hp:             { label: "HP",      color: "#C04040" },
+  ad:             { label: "AD",      color: "#C89B3C" },
+  ap:             { label: "AP",      color: "#7B9FD4" },
+  armor:          { label: "Armor",   color: "#C8A030" },
+  mr:             { label: "MR",      color: "#7B5EA7" },
+  critChance:     { label: "Crit",    color: "#E8C060" },
+  attackSpeedPct: { label: "Vel. At", color: "#70C080" },
+  lifeSteal:      { label: "Robo V",  color: "#C04040" },
+  moveSpeed:      { label: "Vel. M",  color: "#80B4C8" },
+  magicPen:       { label: "Pen. M",  color: "#9B70C8" },
+  armorPen:       { label: "Pen. F",  color: "#D4882A" },
+  hpRegen5:       { label: "Regen",   color: "#80C840" },
+  manaRestore:    { label: "Maná",    color: "#5090E0" },
+  healNow:        { label: "Cura",    color: "#C04040" },
+};
+
+function formatStatValue(key, v) {
+  if (key === "critChance" || key === "attackSpeedPct" || key === "lifeSteal")
+    return `+${Math.round(v * 100)}%`;
+  return `+${v}`;
+}
+
 export function ItemCard({ item, onBuy, canAfford = true, showCost = true, size = "md", selected = false, onClick }) {
   if (!item) return null;
 
-  const statLines = Object.entries(item.stats || {})
+  const visibleStats = Object.entries(item.stats || {})
+    .filter(([k, v]) => v !== 0 && STAT_META[k])
+    .map(([k, v]) => ({ key: k, value: formatStatValue(k, v), ...STAT_META[k] }));
+
+  const tooltipStats = Object.entries(item.stats || {})
     .filter(([, v]) => v !== 0)
     .map(([k, v]) => {
-      const labels = {
-        hp: "HP", ad: "Attack Damage", ap: "Ability Power",
-        armor: "Armor", mr: "Magic Resist", critChance: "Crit Chance",
-        attackSpeedPct: "Attack Speed", moveSpeed: "Move Speed",
-        lifeSteal: "Life Steal", magicPen: "Magic Pen",
-        armorPen: "Armor Pen", hpRegen5: "HP Regen",
-        burn: "On-hit burn", burnAura: "Sunfire aura/turn",
-        healBonus: "Heal power bonus",
-      };
-      const formatted = typeof v === "number" && v < 1 && v > 0
-        ? `+${Math.round(v * 100)}%`
-        : `+${v}`;
-      return `${formatted} ${labels[k] || k}`;
-    })
-    .join("\n");
+      const meta = STAT_META[k];
+      return `${formatStatValue(k, v)} ${meta?.label || k}`;
+    }).join("  ·  ");
 
-  const tooltip = `${item.name}\n${item.plaintext || item.description || ""}\n\n${statLines}`;
+  const tooltip = `${item.name}\n${item.plaintext || item.description || ""}${tooltipStats ? "\n" + tooltipStats : ""}`;
 
   return (
     <div
@@ -163,10 +178,21 @@ export function ItemCard({ item, onBuy, canAfford = true, showCost = true, size 
         {showCost && (
           <div className={styles.itemCost}>
             <span className="text-gold">💰 {item.gold.total}</span>
-            {!canAfford && <span className={styles.cantAffordLabel}> — Not enough gold</span>}
+            {!canAfford && <span className={styles.cantAffordLabel}> No hay oro</span>}
           </div>
         )}
-        <div className={styles.itemDesc}>{item.plaintext || ""}</div>
+        {visibleStats.length > 0 && (
+          <div className={styles.statTags}>
+            {visibleStats.map(s => (
+              <span key={s.key} className={styles.statTag} style={{ color: s.color }}>
+                {s.value} {s.label}
+              </span>
+            ))}
+          </div>
+        )}
+        {item.consumable && item.plaintext && (
+          <div className={styles.itemDesc}>{item.plaintext}</div>
+        )}
       </div>
     </div>
   );

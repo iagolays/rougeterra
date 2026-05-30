@@ -1,0 +1,1258 @@
+{
+  "Garen": {
+    "id": "Garen",
+    "name": "Garen",
+    "title": "The Might of Demacia",
+    "lore": "A proud and noble warrior, Garen fights as one of the Dauntless Vanguard. He is popular among his fellows, and respected well enough by his enemies—not least as a scion of the prestigious Crownguard family, entrusted with defending Demacia and its ideals. Clad in magic-resistant armor and bearing a ",
+    "tags": [
+      "Fighter",
+      "Tank"
+    ],
+    "resource": "None",
+    "type": "melee",
+    "stats": {
+      "hp": 690,
+      "hpPerLvl": 98,
+      "mp": 0,
+      "mpPerLvl": 0,
+      "ad": 69,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 38,
+      "mr": 32,
+      "moveSpeed": 340,
+      "attackRange": 175,
+      "hpRegen": 8
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Perseverance",
+        "description": "If Garen has not recently been struck by damage or enemy abilities, he regenerates a percentage of his total health each second.",
+        "image": "Garen_Passive.png",
+        "imageUrl": "/assets/abilities/Garen_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Decisive Strike",
+        "description": "Garen gains a burst of Move Speed, breaking free of all slows affecting him. His next attack strikes a vital area of his foe, dealing bonus damage and silencing them.",
+        "image": "GarenQ.png",
+        "imageUrl": "/assets/abilities/Garen_Q.png",
+        "cost": 0,
+        "costType": "none",
+        "cooldown": 8.0,
+        "range": 300
+      },
+      {
+        "key": "W",
+        "name": "Courage",
+        "description": "Garen passively increases his Armor and Magic Resist by killing enemies. He may also activate this ability to give him a shield and tenacity for a brief moment followed by a lesser amount of damage reduction for a longer duration.",
+        "image": "GarenW.png",
+        "imageUrl": "/assets/abilities/Garen_W.png",
+        "cost": 0,
+        "costType": "none",
+        "cooldown": 22.0,
+        "range": 0
+      },
+      {
+        "key": "E",
+        "name": "Judgment",
+        "description": "Garen rapidly spins his sword around his body, dealing physical damage to nearby enemies.",
+        "image": "GarenE.png",
+        "imageUrl": "/assets/abilities/Garen_E.png",
+        "cost": 0,
+        "costType": "none",
+        "cooldown": 9.0,
+        "range": 325
+      },
+      {
+        "key": "R",
+        "name": "Demacian Justice",
+        "description": "Garen calls upon the might of Demacia to attempt to execute an enemy champion.",
+        "image": "GarenR.png",
+        "imageUrl": "/assets/abilities/Garen_R.png",
+        "cost": 0,
+        "costType": "none",
+        "cooldown": 120.0,
+        "range": 400
+      }
+    ],
+    "splashUrl": "/assets/champions/Garen_splash.jpg",
+    "iconUrl": "/assets/champions/Garen_icon.png",
+    "loadingUrl": "/assets/champions/Garen_loading.jpg"
+  },
+  "Darius": {
+    "id": "Darius",
+    "name": "Darius",
+    "title": "the Hand of Noxus",
+    "lore": "There is no greater symbol of Noxian might than Darius, the nation's most feared and battle-hardened commander. Rising from humble origins to become the Hand of Noxus, he cleaves through the empire's enemies—many of them Noxians themselves. Knowing that he never doubts his cause is just, and never h",
+    "tags": [
+      "Fighter",
+      "Tank"
+    ],
+    "resource": "Mana",
+    "type": "melee",
+    "stats": {
+      "hp": 652,
+      "hpPerLvl": 114,
+      "mp": 263,
+      "mpPerLvl": 58,
+      "ad": 64,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 37,
+      "mr": 32,
+      "moveSpeed": 340,
+      "attackRange": 175,
+      "hpRegen": 10
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Hemorrhage",
+        "description": "Darius' attacks and damaging abilities cause enemies to bleed for physical damage over 5 seconds, stacking up to 5 times. Darius enrages and gains massive Attack Damage when his target reaches max stacks.",
+        "image": "Darius_Icon_Hemorrhage.png",
+        "imageUrl": "/assets/abilities/Darius_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Decimate",
+        "description": "Darius winds up and swings his axe in a wide circle. Enemies struck by the blade take more damage than those struck by the handle. Darius heals based on enemy champions and large monsters hit by the blade.",
+        "image": "DariusCleave.png",
+        "imageUrl": "/assets/abilities/Darius_Q.png",
+        "cost": 25,
+        "costType": "mana",
+        "cooldown": 9.0,
+        "range": 1
+      },
+      {
+        "key": "W",
+        "name": "Crippling Strike",
+        "description": "Darius's next attack strikes an enemy's crucial artery. As they bleed out, their Move Speed is slowed.",
+        "image": "DariusNoxianTacticsONH.png",
+        "imageUrl": "/assets/abilities/Darius_W.png",
+        "cost": 40,
+        "costType": "mana",
+        "cooldown": 5.0,
+        "range": 300
+      },
+      {
+        "key": "E",
+        "name": "Apprehend",
+        "description": "Darius hones his axe, passively causing his physical damage to ignore a percentage of his target's Armor. When activated, Darius sweeps up his enemies with his axe's hook and pulls them to him.",
+        "image": "DariusAxeGrabCone.png",
+        "imageUrl": "/assets/abilities/Darius_E.png",
+        "cost": 70,
+        "costType": "mana",
+        "cooldown": 26.0,
+        "range": 535
+      },
+      {
+        "key": "R",
+        "name": "Noxian Guillotine",
+        "description": "Darius leaps to an enemy champion and strikes a lethal blow, dealing true damage. This damage is increased for each stack of Hemorrhage on the target. If Noxian Guillotine is a killing blow, its cooldown is refreshed for a brief duration.",
+        "image": "DariusExecute.png",
+        "imageUrl": "/assets/abilities/Darius_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 120.0,
+        "range": 460
+      }
+    ],
+    "splashUrl": "/assets/champions/Darius_splash.jpg",
+    "iconUrl": "/assets/champions/Darius_icon.png",
+    "loadingUrl": "/assets/champions/Darius_loading.jpg"
+  },
+  "Ashe": {
+    "id": "Ashe",
+    "name": "Ashe",
+    "title": "the Frost Archer",
+    "lore": "Iceborn warmother of the Avarosan tribe, Ashe commands the most populous horde in the north. Stoic, intelligent, and idealistic, yet uncomfortable with her role as leader, she taps into the ancestral magics of her lineage to wield a bow of True Ice. With her people's belief that she is the mythologi",
+    "tags": [
+      "Marksman",
+      "Support"
+    ],
+    "resource": "Mana",
+    "type": "range",
+    "stats": {
+      "hp": 610,
+      "hpPerLvl": 101,
+      "mp": 280,
+      "mpPerLvl": 35,
+      "ad": 59,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 26,
+      "mr": 30,
+      "moveSpeed": 325,
+      "attackRange": 600,
+      "hpRegen": 3.5
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Frost Shot",
+        "description": "Ashe's attacks slow their target, causing her to deal increased damage to these targets. Ashe's critical strikes deal no bonus damage but apply an empowered slow to the target.",
+        "image": "Ashe_P.png",
+        "imageUrl": "/assets/abilities/Ashe_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Ranger's Focus",
+        "description": "Ashe builds up Focus by attacking. At maximum Focus, Ashe can cast Ranger's Focus to consume all stacks of Focus, temporarily increasing her Attack Speed and transforming her basic attack into a powerful flurry attack for the duration.",
+        "image": "AsheQ.png",
+        "imageUrl": "/assets/abilities/Ashe_Q.png",
+        "cost": 30,
+        "costType": "mana",
+        "cooldown": 0.0,
+        "range": 400
+      },
+      {
+        "key": "W",
+        "name": "Volley",
+        "description": "Ashe fires arrows in a cone for increased damage. Also applies Frost Shot.",
+        "image": "Volley.png",
+        "imageUrl": "/assets/abilities/Ashe_W.png",
+        "cost": 75,
+        "costType": "mana",
+        "cooldown": 18.0,
+        "range": 1200
+      },
+      {
+        "key": "E",
+        "name": "Hawkshot",
+        "description": "Ashe sends her Hawk Spirit on a scouting mission anywhere on the map.",
+        "image": "AsheSpiritOfTheHawk.png",
+        "imageUrl": "/assets/abilities/Ashe_E.png",
+        "cost": 0,
+        "costType": "mana",
+        "cooldown": 5.0,
+        "range": 25000
+      },
+      {
+        "key": "R",
+        "name": "Enchanted Crystal Arrow",
+        "description": "Ashe fires a missile of ice in a straight line. If the arrow collides with an enemy Champion, it deals damage and stuns the Champion, stunning for longer the farther arrow has traveled. In addition, surrounding enemy units take damage and are slowed.",
+        "image": "EnchantedCrystalArrow.png",
+        "imageUrl": "/assets/abilities/Ashe_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 100.0,
+        "range": 25000
+      }
+    ],
+    "splashUrl": "/assets/champions/Ashe_splash.jpg",
+    "iconUrl": "/assets/champions/Ashe_icon.png",
+    "loadingUrl": "/assets/champions/Ashe_loading.jpg"
+  },
+  "Lux": {
+    "id": "Lux",
+    "name": "Lux",
+    "title": "the Lady of Luminosity",
+    "lore": "Luxanna Crownguard hails from Demacia, an insular realm where magical abilities are viewed with fear and suspicion. Able to bend light to her will, she grew up dreading discovery and exile, and was forced to keep her power secret, in order to preserve her family's noble status. Nonetheless, Lux's op",
+    "tags": [
+      "Mage",
+      "Support"
+    ],
+    "resource": "Mana",
+    "type": "range",
+    "stats": {
+      "hp": 580,
+      "hpPerLvl": 99,
+      "mp": 440,
+      "mpPerLvl": 23.5,
+      "ad": 54,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 21,
+      "mr": 30,
+      "moveSpeed": 330,
+      "attackRange": 550,
+      "hpRegen": 5.5
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Illumination",
+        "description": "Lux's damaging spells charge the target with energy for a few seconds. Lux's next attack ignites the energy, dealing bonus magic damage (depending on Lux's level) to the target.",
+        "image": "LuxIlluminatingFraulein.png",
+        "imageUrl": "/assets/abilities/Lux_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Light Binding",
+        "description": "Lux releases a sphere of light that binds and deals damage to up to two enemy units.",
+        "image": "LuxLightBinding.png",
+        "imageUrl": "/assets/abilities/Lux_Q.png",
+        "cost": 50,
+        "costType": "mana",
+        "cooldown": 10.0,
+        "range": 1175
+      },
+      {
+        "key": "W",
+        "name": "Prismatic Barrier",
+        "description": "Lux throws her wand and bends the light around any friendly target it touches, protecting them from enemy damage.",
+        "image": "LuxPrismaticWave.png",
+        "imageUrl": "/assets/abilities/Lux_W.png",
+        "cost": 60,
+        "costType": "mana",
+        "cooldown": 12.0,
+        "range": 1150
+      },
+      {
+        "key": "E",
+        "name": "Lucent Singularity",
+        "description": "Fires an anomaly of twisted light to an area, which slows nearby enemies. Lux can detonate it to damage enemies in the area of effect.",
+        "image": "LuxLightStrikeKugel.png",
+        "imageUrl": "/assets/abilities/Lux_E.png",
+        "cost": 70,
+        "costType": "mana",
+        "cooldown": 10.0,
+        "range": 1100
+      },
+      {
+        "key": "R",
+        "name": "Final Spark",
+        "description": "After gathering energy, Lux fires a beam of light that deals damage to all targets in the area. In addition, triggers Lux's passive ability and refreshes the Illumination debuff duration.",
+        "image": "LuxR.png",
+        "imageUrl": "/assets/abilities/Lux_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 60.0,
+        "range": 3340
+      }
+    ],
+    "splashUrl": "/assets/champions/Lux_splash.jpg",
+    "iconUrl": "/assets/champions/Lux_icon.png",
+    "loadingUrl": "/assets/champions/Lux_loading.jpg"
+  },
+  "Akali": {
+    "id": "Akali",
+    "name": "Akali",
+    "title": "the Rogue Assassin",
+    "lore": "Abandoning the Kinkou Order and her title of the Fist of Shadow, Akali now strikes alone, ready to be the deadly weapon her people need. Though she holds onto all she learned from her master Shen, she has pledged to defend Ionia from its enemies, one kill at a time. Akali may strike in silence, but ",
+    "tags": [
+      "Assassin"
+    ],
+    "resource": "Energy",
+    "type": "range",
+    "stats": {
+      "hp": 600,
+      "hpPerLvl": 119,
+      "mp": 200,
+      "mpPerLvl": 0,
+      "ad": 62,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 23,
+      "mr": 37,
+      "moveSpeed": 345,
+      "attackRange": 125,
+      "hpRegen": 9
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Assassin's Mark",
+        "description": "Dealing spell damage to a champion creates a ring of energy around them. Exiting that ring empowers Akali's next Attack with bonus range and damage.",
+        "image": "Akali_P.png",
+        "imageUrl": "/assets/abilities/Akali_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Five Point Strike",
+        "description": "Akali throws out five kunai, dealing damage based on her bonus Attack Damage and Ability Power and slowing.",
+        "image": "AkaliQ.png",
+        "imageUrl": "/assets/abilities/Akali_Q.png",
+        "cost": 110,
+        "costType": "energy",
+        "cooldown": 1.5,
+        "range": 550
+      },
+      {
+        "key": "W",
+        "name": "Twilight Shroud",
+        "description": "Akali drops a cover of smoke and briefly gains Move Speed. While inside the shroud, Akali becomes invisible and unable to be selected by enemy spells and attacks. Attacking or using abilities will briefly reveal her.",
+        "image": "AkaliW.png",
+        "imageUrl": "/assets/abilities/Akali_W.png",
+        "cost": 0,
+        "costType": "energy",
+        "cooldown": 20.0,
+        "range": 350
+      },
+      {
+        "key": "E",
+        "name": "Shuriken Flip",
+        "description": "Flip backward and fire a shuriken forward, dealing magic damage. The first enemy or smoke cloud hit is marked. Re-cast to dash to the marked target, dealing additional damage.",
+        "image": "AkaliE.png",
+        "imageUrl": "/assets/abilities/Akali_E.png",
+        "cost": 30,
+        "costType": "energy",
+        "cooldown": 16.0,
+        "range": 825
+      },
+      {
+        "key": "R",
+        "name": "Perfect Execution",
+        "description": "Akali leaps in a direction, damaging enemies she strikes. Re-cast: Akali dashes in a direction, executing all enemies she strikes.",
+        "image": "AkaliR.png",
+        "imageUrl": "/assets/abilities/Akali_R.png",
+        "cost": 0,
+        "costType": "energy",
+        "cooldown": 120.0,
+        "range": 675
+      }
+    ],
+    "splashUrl": "/assets/champions/Akali_splash.jpg",
+    "iconUrl": "/assets/champions/Akali_icon.png",
+    "loadingUrl": "/assets/champions/Akali_loading.jpg"
+  },
+  "Jinx": {
+    "id": "Jinx",
+    "name": "Jinx",
+    "title": "the Loose Cannon",
+    "lore": "An unhinged and impulsive criminal from the undercity, Jinx is haunted by the consequences of her past—but that doesn't stop her from bringing her own chaotic brand of pandemonium to Piltover and Zaun. She uses her arsenal of DIY weapons to devastating effect, unleashing torrents of colorful explosi",
+    "tags": [
+      "Marksman"
+    ],
+    "resource": "Mana",
+    "type": "range",
+    "stats": {
+      "hp": 630,
+      "hpPerLvl": 105,
+      "mp": 260,
+      "mpPerLvl": 50,
+      "ad": 59,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 26,
+      "mr": 30,
+      "moveSpeed": 325,
+      "attackRange": 525,
+      "hpRegen": 3.75
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Get Excited!",
+        "description": "Jinx receives massively increased Move Speed and Attack Speed whenever she helps kill or destroy an enemy champions epic jungle monster, or structure.",
+        "image": "Jinx_Passive.png",
+        "imageUrl": "/assets/abilities/Jinx_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Switcheroo!",
+        "description": "Jinx modifies her basic attacks by swapping between Pow-Pow, her minigun and Fishbones, her rocket launcher. Attacks with Pow-Pow grant Attack Speed, while attacks with Fishbones deal area of effect damage, gain increased range, but drain Mana and attack slower.",
+        "image": "JinxQ.png",
+        "imageUrl": "/assets/abilities/Jinx_Q.png",
+        "cost": 20,
+        "costType": "mana",
+        "cooldown": 0.9,
+        "range": 600
+      },
+      {
+        "key": "W",
+        "name": "Zap!",
+        "description": "Jinx uses Zapper, her shock pistol, to fire a blast that deals damage to the first enemy hit, slowing and revealing it.",
+        "image": "JinxW.png",
+        "imageUrl": "/assets/abilities/Jinx_W.png",
+        "cost": 40,
+        "costType": "mana",
+        "cooldown": 8.0,
+        "range": 1450
+      },
+      {
+        "key": "E",
+        "name": "Flame Chompers!",
+        "description": "Jinx throws out a line of snare grenades that explode after 5 seconds, lighting enemies on fire. Flame Chompers will bite enemy champions who walk over them, rooting them in place.",
+        "image": "JinxE.png",
+        "imageUrl": "/assets/abilities/Jinx_E.png",
+        "cost": 90,
+        "costType": "mana",
+        "cooldown": 24.0,
+        "range": 925
+      },
+      {
+        "key": "R",
+        "name": "Super Mega Death Rocket!",
+        "description": "Jinx fires a super rocket across the map that gains damage as it travels. The rocket will explode upon colliding with an enemy champion, dealing damage to it and surrounding enemies based on their missing Health.",
+        "image": "JinxR.png",
+        "imageUrl": "/assets/abilities/Jinx_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 85.0,
+        "range": 25000
+      }
+    ],
+    "splashUrl": "/assets/champions/Jinx_splash.jpg",
+    "iconUrl": "/assets/champions/Jinx_icon.png",
+    "loadingUrl": "/assets/champions/Jinx_loading.jpg"
+  },
+  "Tryndamere": {
+    "id": "Tryndamere",
+    "name": "Tryndamere",
+    "title": "the Barbarian King",
+    "lore": "Fueled by unbridled fury and rage, Tryndamere once carved his way through the Freljord, openly challenging the greatest warriors of the north to prepare himself for even darker days ahead. The wrathful barbarian has long sought revenge for the annihilation of his clan, though more recently he has fo",
+    "tags": [
+      "Fighter",
+      "Assassin"
+    ],
+    "resource": "Fury",
+    "type": "melee",
+    "stats": {
+      "hp": 696,
+      "hpPerLvl": 108,
+      "mp": 100,
+      "mpPerLvl": 0,
+      "ad": 66,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 33,
+      "mr": 32,
+      "moveSpeed": 345,
+      "attackRange": 175,
+      "hpRegen": 8.5
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Battle Fury",
+        "description": "Tryndamere gains Fury for each attack, critical strike, and killing blow he makes. Fury passively increases his Critical Strike Chance and can be consumed with his Bloodlust spell.",
+        "image": "Tryndamere_Passive.png",
+        "imageUrl": "/assets/abilities/Tryndamere_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Bloodlust",
+        "description": "Tryndamere thrives on the thrills of combat, increasing his Attack Damage as he is more and more wounded. He can cast Bloodlust to consume his Fury and heal himself.",
+        "image": "TryndamereQ.png",
+        "imageUrl": "/assets/abilities/Tryndamere_Q.png",
+        "cost": 0,
+        "costType": "fury",
+        "cooldown": 12.0,
+        "range": 400
+      },
+      {
+        "key": "W",
+        "name": "Mocking Shout",
+        "description": "Tryndamere lets out an insulting cry, decreasing surrounding champions' Attack Damage. Enemies with their backs turned to Tryndamere also have their Move Speed reduced.",
+        "image": "TryndamereW.png",
+        "imageUrl": "/assets/abilities/Tryndamere_W.png",
+        "cost": 0,
+        "costType": "fury",
+        "cooldown": 14.0,
+        "range": 850
+      },
+      {
+        "key": "E",
+        "name": "Spinning Slash",
+        "description": "Tryndamere slices toward a target unit, dealing damage to enemies in his path.",
+        "image": "TryndamereE.png",
+        "imageUrl": "/assets/abilities/Tryndamere_E.png",
+        "cost": 0,
+        "costType": "fury",
+        "cooldown": 12.0,
+        "range": 650
+      },
+      {
+        "key": "R",
+        "name": "Undying Rage",
+        "description": "Tryndamere's lust for battle becomes so strong that he is unable to die, no matter how wounded he becomes.",
+        "image": "UndyingRage.png",
+        "imageUrl": "/assets/abilities/Tryndamere_R.png",
+        "cost": 0,
+        "costType": "fury",
+        "cooldown": 120.0,
+        "range": 400
+      }
+    ],
+    "splashUrl": "/assets/champions/Tryndamere_splash.jpg",
+    "iconUrl": "/assets/champions/Tryndamere_icon.png",
+    "loadingUrl": "/assets/champions/Tryndamere_loading.jpg"
+  },
+  "Soraka": {
+    "id": "Soraka",
+    "name": "Soraka",
+    "title": "the Starchild",
+    "lore": "A wanderer from the celestial dimensions beyond Mount Targon, Soraka gave up her immortality to protect the mortal races from their own more violent instincts. She endeavors to spread the virtues of compassion and mercy to everyone she meets—even healing those who would wish harm upon her. And, for ",
+    "tags": [
+      "Support",
+      "Mage"
+    ],
+    "resource": "Mana",
+    "type": "range",
+    "stats": {
+      "hp": 605,
+      "hpPerLvl": 88,
+      "mp": 425,
+      "mpPerLvl": 40,
+      "ad": 50,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 32,
+      "mr": 30,
+      "moveSpeed": 325,
+      "attackRange": 550,
+      "hpRegen": 2.5
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Salvation",
+        "description": "Soraka runs faster towards nearby low health allies.",
+        "image": "Soraka_Passive.png",
+        "imageUrl": "/assets/abilities/Soraka_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Starcall",
+        "description": "A star falls from the sky at the target location dealing magic damage and slowing enemies. If an enemy champion is hit by Starcall, Soraka recovers Health.",
+        "image": "SorakaQ.png",
+        "imageUrl": "/assets/abilities/Soraka_Q.png",
+        "cost": 45,
+        "costType": "mana",
+        "cooldown": 8.0,
+        "range": 810
+      },
+      {
+        "key": "W",
+        "name": "Astral Infusion",
+        "description": "Soraka sacrifices a portion of her own health to heal another friendly champion.",
+        "image": "SorakaW.png",
+        "imageUrl": "/assets/abilities/Soraka_W.png",
+        "cost": 40,
+        "costType": "mana",
+        "cooldown": 6.0,
+        "range": 550
+      },
+      {
+        "key": "E",
+        "name": "Equinox",
+        "description": "Creates a zone at a location that silences all enemies inside. When the zone expires, all enemies still inside are rooted.",
+        "image": "SorakaE.png",
+        "imageUrl": "/assets/abilities/Soraka_E.png",
+        "cost": 70,
+        "costType": "mana",
+        "cooldown": 20.0,
+        "range": 925
+      },
+      {
+        "key": "R",
+        "name": "Wish",
+        "description": "Soraka fills her allies with hope, instantly restoring health to herself and all allied champions.",
+        "image": "SorakaR.png",
+        "imageUrl": "/assets/abilities/Soraka_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 150.0,
+        "range": 25000
+      }
+    ],
+    "splashUrl": "/assets/champions/Soraka_splash.jpg",
+    "iconUrl": "/assets/champions/Soraka_icon.png",
+    "loadingUrl": "/assets/champions/Soraka_loading.jpg"
+  },
+  "Yasuo": {
+    "id": "Yasuo",
+    "name": "Yasuo",
+    "title": "the Unforgiven",
+    "lore": "An Ionian of deep resolve, Yasuo is an agile swordsman who wields the air itself against his enemies. As a proud young man, he was falsely accused of murdering his master—unable to prove his innocence, he was forced to slay his own brother in self defense. Even after his master's true killer was rev",
+    "tags": [
+      "Fighter",
+      "Assassin"
+    ],
+    "resource": "Flow",
+    "type": "melee",
+    "stats": {
+      "hp": 590,
+      "hpPerLvl": 110,
+      "mp": 100,
+      "mpPerLvl": 0,
+      "ad": 60,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 32,
+      "mr": 32,
+      "moveSpeed": 345,
+      "attackRange": 175,
+      "hpRegen": 6.5
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Way of the Wanderer",
+        "description": "Yasuo's Critical Strike Chance is increased. Additionally, Yasuo builds toward a shield whenever he is moving. The shield triggers when he takes damage from a champion or monster.",
+        "image": "Yasuo_Passive.png",
+        "imageUrl": "/assets/abilities/Yasuo_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Steel Tempest",
+        "description": "Thrusts forward, damaging all enemies in a line. On hit, grants a stack of Gathering Storm for a few seconds. At 2 stacks, Steel Tempest fires a whirlwind that knocks Airborne. Steel Tempest is treated as a basic attack and scales with all the same things.",
+        "image": "YasuoQ1Wrapper.png",
+        "imageUrl": "/assets/abilities/Yasuo_Q.png",
+        "cost": 0,
+        "costType": "none",
+        "cooldown": 4.0,
+        "range": 475
+      },
+      {
+        "key": "W",
+        "name": "Wind Wall",
+        "description": "Creates a moving wall that blocks all enemy projectiles for 4 seconds.",
+        "image": "YasuoW.png",
+        "imageUrl": "/assets/abilities/Yasuo_W.png",
+        "cost": 0,
+        "costType": "none",
+        "cooldown": 25.0,
+        "range": 400
+      },
+      {
+        "key": "E",
+        "name": "Sweeping Blade",
+        "description": "Dashes through target enemy, dealing magic damage. Each cast increases subsequent dash's damage, up to a max amount. Cannot be re-cast on the same enemy for a few seconds. If Steel Tempest is cast while dashing, it will strike as a circle.",
+        "image": "YasuoE.png",
+        "imageUrl": "/assets/abilities/Yasuo_E.png",
+        "cost": 0,
+        "costType": "none",
+        "cooldown": 0.5,
+        "range": 475
+      },
+      {
+        "key": "R",
+        "name": "Last Breath",
+        "description": "Blinks to an Airborne enemy champion, dealing physical damage and holding all Airborne enemies in the area in the air. Grants maximum Flow but resets all stacks of Gathering Storm. For a moderate time afterwards, Yasuo's critical strikes gain significant Bonus Armor Penetration.",
+        "image": "YasuoR.png",
+        "imageUrl": "/assets/abilities/Yasuo_R.png",
+        "cost": 0,
+        "costType": "none",
+        "cooldown": 70.0,
+        "range": 1400
+      }
+    ],
+    "splashUrl": "/assets/champions/Yasuo_splash.jpg",
+    "iconUrl": "/assets/champions/Yasuo_icon.png",
+    "loadingUrl": "/assets/champions/Yasuo_loading.jpg"
+  },
+  "Vi": {
+    "id": "Vi",
+    "name": "Vi",
+    "title": "the Piltover Enforcer",
+    "lore": "Raised on the mean streets of Zaun, Vi is a hotheaded, impulsive, and fearsome woman with very little respect for authority. She has always been a shrewd survivor, both from her youthful troublemaking topside and an unfairly long stint in Stillwater Hold. Now working with the Piltover Enforcers to k",
+    "tags": [
+      "Fighter",
+      "Assassin"
+    ],
+    "resource": "Mana",
+    "type": "melee",
+    "stats": {
+      "hp": 655,
+      "hpPerLvl": 105,
+      "mp": 295,
+      "mpPerLvl": 65,
+      "ad": 63,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 30,
+      "mr": 32,
+      "moveSpeed": 340,
+      "attackRange": 125,
+      "hpRegen": 10
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Blast Shield",
+        "description": "Vi charges a shield over time. The shield can be activated by hitting an enemy with an ability.",
+        "image": "ViPassive.png",
+        "imageUrl": "/assets/abilities/Vi_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Vault Breaker",
+        "description": "Vi charges her gauntlets and unleashes a vault shattering punch, carrying her forward. Enemies she hits are knocked back and receive a stack of Denting Blows.",
+        "image": "ViQ.png",
+        "imageUrl": "/assets/abilities/Vi_Q.png",
+        "cost": 50,
+        "costType": "mana",
+        "cooldown": 12.0,
+        "range": 250
+      },
+      {
+        "key": "W",
+        "name": "Denting Blows",
+        "description": "Vi's punches break her opponent's Armor, dealing bonus damage and granting her Attack Speed.",
+        "image": "ViW.png",
+        "imageUrl": "/assets/abilities/Vi_W.png",
+        "cost": 0,
+        "costType": "mana",
+        "cooldown": 0.0,
+        "range": 750
+      },
+      {
+        "key": "E",
+        "name": "Relentless Force",
+        "description": "Vi's next attack blasts through her target, dealing damage to enemies behind it.",
+        "image": "ViE.png",
+        "imageUrl": "/assets/abilities/Vi_E.png",
+        "cost": 26,
+        "costType": "mana",
+        "cooldown": 1.0,
+        "range": 400
+      },
+      {
+        "key": "R",
+        "name": "Cease and Desist",
+        "description": "Vi runs down an enemy, knocking aside anyone in the way. When she reaches her target she knocks it into the air, jumps after it, and slams it back into the ground.",
+        "image": "ViR.png",
+        "imageUrl": "/assets/abilities/Vi_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 140.0,
+        "range": 800
+      }
+    ],
+    "splashUrl": "/assets/champions/Vi_splash.jpg",
+    "iconUrl": "/assets/champions/Vi_icon.png",
+    "loadingUrl": "/assets/champions/Vi_loading.jpg"
+  },
+  "Caitlyn": {
+    "id": "Caitlyn",
+    "name": "Caitlyn",
+    "title": "the Sheriff of Piltover",
+    "lore": "Renowned as its finest peacekeeper, Caitlyn Kiramman is also Piltover's best shot at ridding the city of its elusive criminal elements. She is often paired with Vi, acting as a cool counterpoint to her partner's more impetuous nature. Even though she carries a one-of-a-kind hextech rifle, Caitlyn's ",
+    "tags": [
+      "Marksman"
+    ],
+    "resource": "Mana",
+    "type": "range",
+    "stats": {
+      "hp": 580,
+      "hpPerLvl": 107,
+      "mp": 315,
+      "mpPerLvl": 40,
+      "ad": 62,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 27,
+      "mr": 30,
+      "moveSpeed": 325,
+      "attackRange": 650,
+      "hpRegen": 3.5
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Headshot",
+        "description": "Every few basic attacks, or against a target she has trapped or netted, Caitlyn will fire a headshot dealing bonus damage that scales with her critical strike chance. On trapped or netted targets, Caitlyn's Headshot attack range is doubled.",
+        "image": "Caitlyn_Headshot.png",
+        "imageUrl": "/assets/abilities/Caitlyn_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Piltover Peacemaker",
+        "description": "Caitlyn revs up her rifle for 1 second to unleash a penetrating shot that deals physical damage (deals less damage to subsequent targets).",
+        "image": "CaitlynQ.png",
+        "imageUrl": "/assets/abilities/Caitlyn_Q.png",
+        "cost": 55,
+        "costType": "mana",
+        "cooldown": 10.0,
+        "range": 1250
+      },
+      {
+        "key": "W",
+        "name": "Yordle Snap Trap",
+        "description": "Caitlyn sets a trap that, when sprung, reveals and immobilizes the enemy champion for 1.5 seconds, granting Caitlyn an empowered Headshot.",
+        "image": "CaitlynW.png",
+        "imageUrl": "/assets/abilities/Caitlyn_W.png",
+        "cost": 20,
+        "costType": "mana",
+        "cooldown": 0.5,
+        "range": 800
+      },
+      {
+        "key": "E",
+        "name": "90 Caliber Net",
+        "description": "Caitlyn fires a heavy net to slow her target. The recoil knocks Caitlyn back.",
+        "image": "CaitlynE.png",
+        "imageUrl": "/assets/abilities/Caitlyn_E.png",
+        "cost": 75,
+        "costType": "mana",
+        "cooldown": 16.0,
+        "range": 750
+      },
+      {
+        "key": "R",
+        "name": "Ace in the Hole",
+        "description": "Caitlyn takes time to line up the perfect shot, dealing massive damage to a single target at a huge range. Enemy champions can intercept the bullet for their ally.",
+        "image": "CaitlynR.png",
+        "imageUrl": "/assets/abilities/Caitlyn_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 90.0,
+        "range": 3500
+      }
+    ],
+    "splashUrl": "/assets/champions/Caitlyn_splash.jpg",
+    "iconUrl": "/assets/champions/Caitlyn_icon.png",
+    "loadingUrl": "/assets/champions/Caitlyn_loading.jpg"
+  },
+  "Zed": {
+    "id": "Zed",
+    "name": "Zed",
+    "title": "the Master of Shadows",
+    "lore": "Utterly ruthless and without mercy, Zed is the leader of the Order of Shadow, an organization he created with the intent of militarizing Ionia's magical and martial traditions to drive out Noxian invaders. During the war, desperation led him to unlock the secret shadow form—a malevolent spirit magic",
+    "tags": [
+      "Assassin"
+    ],
+    "resource": "Energy",
+    "type": "range",
+    "stats": {
+      "hp": 654,
+      "hpPerLvl": 99,
+      "mp": 200,
+      "mpPerLvl": 0,
+      "ad": 63,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 32,
+      "mr": 29,
+      "moveSpeed": 345,
+      "attackRange": 125,
+      "hpRegen": 7
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Contempt for the Weak",
+        "description": "Zed's basic attacks against low health targets deals bonus Magic Damage. This effect can only occur once every few seconds against the same enemy champion.",
+        "image": "ZedP.png",
+        "imageUrl": "/assets/abilities/Zed_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Razor Shuriken",
+        "description": "Zed and his shadows throw their shurikens. Each shuriken deals damage to every enemy hit.",
+        "image": "ZedQ.png",
+        "imageUrl": "/assets/abilities/Zed_Q.png",
+        "cost": 75,
+        "costType": "energy",
+        "cooldown": 6.0,
+        "range": 900
+      },
+      {
+        "key": "W",
+        "name": "Living Shadow",
+        "description": "Passive: Zed gains energy whenever he and his shadows strike an enemy with the same ability. Energy can only be gained once per cast ability. Active: Zed's shadow dashes forward, remaining in place for a few seconds. Reactivating Living Shadow will cause Zed to switch positions with this shadow.",
+        "image": "ZedW.png",
+        "imageUrl": "/assets/abilities/Zed_W.png",
+        "cost": 40,
+        "costType": "energy",
+        "cooldown": 20.0,
+        "range": 650
+      },
+      {
+        "key": "E",
+        "name": "Shadow Slash",
+        "description": "Zed and his Shadows slash, dealing damage to nearby enemies. Enemies hit by a Shadow's slash are slowed.",
+        "image": "ZedE.png",
+        "imageUrl": "/assets/abilities/Zed_E.png",
+        "cost": 40,
+        "costType": "energy",
+        "cooldown": 5.0,
+        "range": 290
+      },
+      {
+        "key": "R",
+        "name": "Death Mark",
+        "description": "Zed becomes untargetable and dashes to an enemy champion, marking them. After 3 seconds the mark triggers, repeating a portion of all the damage Zed dealt to the target while they were marked.",
+        "image": "ZedR.png",
+        "imageUrl": "/assets/abilities/Zed_R.png",
+        "cost": 0,
+        "costType": "energy",
+        "cooldown": 120.0,
+        "range": 625
+      }
+    ],
+    "splashUrl": "/assets/champions/Zed_splash.jpg",
+    "iconUrl": "/assets/champions/Zed_icon.png",
+    "loadingUrl": "/assets/champions/Zed_loading.jpg"
+  },
+  "Leona": {
+    "id": "Leona",
+    "name": "Leona",
+    "title": "the Radiant Dawn",
+    "lore": "Imbued with the fire of the sun, Leona is a holy warrior of the Solari who defends Mount Targon with her Zenith Blade and the Shield of Daybreak. Her skin shimmers with starfire while her eyes burn with the power of the celestial Aspect within her. Armored in gold and bearing a terrible burden of an",
+    "tags": [
+      "Tank",
+      "Support"
+    ],
+    "resource": "Mana",
+    "type": "melee",
+    "stats": {
+      "hp": 646,
+      "hpPerLvl": 101,
+      "mp": 302,
+      "mpPerLvl": 40,
+      "ad": 60,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 43,
+      "mr": 32,
+      "moveSpeed": 335,
+      "attackRange": 125,
+      "hpRegen": 8.5
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Sunlight",
+        "description": "Damaging spells afflict enemies with Sunlight for 1.5 seconds. When allied Champions deal damage to those targets, they consume the Sunlight to deal additional magic damage.",
+        "image": "LeonaSunlight.png",
+        "imageUrl": "/assets/abilities/Leona_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Shield of Daybreak",
+        "description": "Leona uses her shield to perform her next basic attack, dealing bonus magic damage and stunning the target.",
+        "image": "LeonaShieldOfDaybreak.png",
+        "imageUrl": "/assets/abilities/Leona_Q.png",
+        "cost": 30,
+        "costType": "mana",
+        "cooldown": 5.0,
+        "range": 100
+      },
+      {
+        "key": "W",
+        "name": "Eclipse",
+        "description": "Leona raises her shield to gain Damage Reduction, Armor, and Magic Resist. When the duration first ends, if there are nearby enemies, she will deal magic damage to them and prolong the duration of the effect.",
+        "image": "LeonaSolarBarrier.png",
+        "imageUrl": "/assets/abilities/Leona_W.png",
+        "cost": 60,
+        "costType": "mana",
+        "cooldown": 14.0,
+        "range": 450
+      },
+      {
+        "key": "E",
+        "name": "Zenith Blade",
+        "description": "Leona projects a solar image of her sword, dealing magic damage to all enemies in a line. When the image fades, the last enemy champion struck will be briefly immobilized and Leona will dash to them.",
+        "image": "LeonaZenithBlade.png",
+        "imageUrl": "/assets/abilities/Leona_E.png",
+        "cost": 40,
+        "costType": "mana",
+        "cooldown": 12.0,
+        "range": 875
+      },
+      {
+        "key": "R",
+        "name": "Solar Flare",
+        "description": "Leona calls down a beam of solar energy, dealing damage to enemies in an area. Enemies in the center of the area are stunned, while enemies on the outside are slowed.",
+        "image": "LeonaSolarFlare.png",
+        "imageUrl": "/assets/abilities/Leona_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 90.0,
+        "range": 1200
+      }
+    ],
+    "splashUrl": "/assets/champions/Leona_splash.jpg",
+    "iconUrl": "/assets/champions/Leona_icon.png",
+    "loadingUrl": "/assets/champions/Leona_loading.jpg"
+  },
+  "Thresh": {
+    "id": "Thresh",
+    "name": "Thresh",
+    "title": "the Chain Warden",
+    "lore": "Sadistic and cunning, Thresh is an ambitious and restless specter of the Shadow Isles. Once the custodian of countless arcane secrets, he was undone by a power greater than life or death, and now sustains himself by tormenting and breaking others with slow, excruciating inventiveness. His victims su",
+    "tags": [
+      "Support",
+      "Tank"
+    ],
+    "resource": "Mana",
+    "type": "melee",
+    "stats": {
+      "hp": 620,
+      "hpPerLvl": 120,
+      "mp": 274,
+      "mpPerLvl": 44,
+      "ad": 56,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 33,
+      "mr": 30,
+      "moveSpeed": 330,
+      "attackRange": 450,
+      "hpRegen": 7
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Damnation",
+        "description": "Thresh can harvest the souls of enemies that die near him, permanently granting him Armor and Ability Power.",
+        "image": "Thresh_Passive.png",
+        "imageUrl": "/assets/abilities/Thresh_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Death Sentence",
+        "description": "Thresh binds an enemy in chains and pulls them toward him. Activating this ability a second time pulls Thresh to the enemy.",
+        "image": "ThreshQ.png",
+        "imageUrl": "/assets/abilities/Thresh_Q.png",
+        "cost": 70,
+        "costType": "mana",
+        "cooldown": 19.0,
+        "range": 1075
+      },
+      {
+        "key": "W",
+        "name": "Dark Passage",
+        "description": "Thresh throws out a lantern that shields nearby allied Champions from damage. Allies can click the lantern to dash to Thresh.",
+        "image": "ThreshW.png",
+        "imageUrl": "/assets/abilities/Thresh_W.png",
+        "cost": 50,
+        "costType": "mana",
+        "cooldown": 21.0,
+        "range": 950
+      },
+      {
+        "key": "E",
+        "name": "Flay",
+        "description": "Thresh's attacks wind up, dealing more damage the longer he waits between attacks. When activated, Thresh sweeps his chain, knocking all enemies hit in the direction of the blow.",
+        "image": "ThreshE.png",
+        "imageUrl": "/assets/abilities/Thresh_E.png",
+        "cost": 60,
+        "costType": "mana",
+        "cooldown": 13.0,
+        "range": 500
+      },
+      {
+        "key": "R",
+        "name": "The Box",
+        "description": "A prison of walls that slow and deal damage if broken.",
+        "image": "ThreshRPenta.png",
+        "imageUrl": "/assets/abilities/Thresh_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 120.0,
+        "range": 450
+      }
+    ],
+    "splashUrl": "/assets/champions/Thresh_splash.jpg",
+    "iconUrl": "/assets/champions/Thresh_icon.png",
+    "loadingUrl": "/assets/champions/Thresh_loading.jpg"
+  },
+  "Fiora": {
+    "id": "Fiora",
+    "name": "Fiora",
+    "title": "the Grand Duelist",
+    "lore": "The most feared duelist in all Valoran, Fiora is as renowned for her brusque manner and cunning mind as she is for the speed of her bluesteel rapier. Born to House Laurent in the kingdom of Demacia, Fiora took control of the family from her father in the wake of a scandal that nearly destroyed them.",
+    "tags": [
+      "Fighter",
+      "Assassin"
+    ],
+    "resource": "Mana",
+    "type": "melee",
+    "stats": {
+      "hp": 620,
+      "hpPerLvl": 99,
+      "mp": 300,
+      "mpPerLvl": 60,
+      "ad": 66,
+      "adPerLvl": 0,
+      "ap": 0,
+      "armor": 33,
+      "mr": 32,
+      "moveSpeed": 345,
+      "attackRange": 150,
+      "hpRegen": 8.5
+    },
+    "abilities": [
+      {
+        "key": "P",
+        "name": "Duelist's Dance",
+        "description": "Fiora has revealed a Vital on this Champion. If she hits the Vital, she restores Health and gains Move Speed.",
+        "image": "Fiora_P.png",
+        "imageUrl": "/assets/abilities/Fiora_P.png",
+        "cost": 0,
+        "costType": "none"
+      },
+      {
+        "key": "Q",
+        "name": "Lunge",
+        "description": "Fiora lunges in a direction and stabs a nearby enemy, dealing physical damage and applying on-hit effects.",
+        "image": "FioraQ.png",
+        "imageUrl": "/assets/abilities/Fiora_Q.png",
+        "cost": 20,
+        "costType": "mana",
+        "cooldown": 13.0,
+        "range": 400
+      },
+      {
+        "key": "W",
+        "name": "Riposte",
+        "description": "Fiora parries all incoming damage and disables for a short time, then stabs in a direction. This stab slows the first enemy champion hit, or stuns them if Fiora blocked an immobilizing effect with this ability.",
+        "image": "FioraW.png",
+        "imageUrl": "/assets/abilities/Fiora_W.png",
+        "cost": 50,
+        "costType": "mana",
+        "cooldown": 24.0,
+        "range": 750
+      },
+      {
+        "key": "E",
+        "name": "Bladework",
+        "description": "Fiora has increased attack speed for the next two attacks. The first attack slows the target, and the second attack will critically strike.",
+        "image": "FioraE.png",
+        "imageUrl": "/assets/abilities/Fiora_E.png",
+        "cost": 40,
+        "costType": "mana",
+        "cooldown": 11.0,
+        "range": 425
+      },
+      {
+        "key": "R",
+        "name": "Grand Challenge",
+        "description": "Fiora reveals all four Vitals on an enemy champion and gains Move Speed while near them. If Fiora hits all four Vitals or if the target dies after she has hit at least one, Fiora and her allies in the area are healed over the next few seconds.",
+        "image": "FioraR.png",
+        "imageUrl": "/assets/abilities/Fiora_R.png",
+        "cost": 100,
+        "costType": "mana",
+        "cooldown": 110.0,
+        "range": 500
+      }
+    ],
+    "splashUrl": "/assets/champions/Fiora_splash.jpg",
+    "iconUrl": "/assets/champions/Fiora_icon.png",
+    "loadingUrl": "/assets/champions/Fiora_loading.jpg"
+  }
+}

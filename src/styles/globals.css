@@ -1,0 +1,324 @@
+/* globals.css — Design tokens and base styles for Runeterra Roguelike */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+
+/* ─── DESIGN TOKENS ──────────────────────────────────────────────────────── */
+:root {
+  /* Gold palette */
+  --gold-50:   #FFFBEB;
+  --gold-100:  #F0E6A2;
+  --gold-400:  #C89B3C;
+  --gold-600:  #785A28;
+  --gold-900:  #3D2B0A;
+
+  /* Base surfaces */
+  --bg-void:   #010A13;
+  --bg-deep:   #091428;
+  --bg-mid:    #0E1F3D;
+  --bg-card:   #0A1628;
+  --bg-hover:  #132135;
+  --bg-elite:  #14203A;
+
+  /* Borders */
+  --border-dim:    rgba(200, 155, 60, 0.18);
+  --border-base:   rgba(200, 155, 60, 0.32);
+  --border-bright: rgba(200, 155, 60, 0.65);
+  --border-glow:   rgba(200, 155, 60, 0.9);
+
+  /* Text */
+  --text-muted:   #4A3F28;
+  --text-dim:     #7A6A45;
+  --text-base:    #C8AA6E;
+  --text-bright:  #F0E6A2;
+  --text-white:   #F5F0E8;
+
+  /* Semantic */
+  --hp-red:    #C04040;
+  --hp-low:    #E05050;
+  --mp-blue:   #3B78FF;
+  --mp-light:  #7AB4FF;
+  --energy:    #F0B429;
+  --green:     #00C853;
+  --purple:    #9B59B6;
+  --teal:      #00E5D4;
+  --red:       #C83737;
+  --red-light: #FF6B6B;
+
+  /* Region accents */
+  --demacia:    #1E4080;
+  --noxus:      #8B1A1A;
+  --freljord:   #1A4A6B;
+  --piltover:   #7A5C00;
+  --shadow:     #2D1B4E;
+  --void-accent:#3A0080;
+
+  /* Typography */
+  --font-display: 'Cinzel', Georgia, serif;
+  --font-body:    'Crimson Pro', 'Georgia', serif;
+  --font-mono:    'Fira Code', 'Consolas', monospace;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Radius */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+
+  /* Transitions */
+  --transition: 0.2s ease;
+  --transition-slow: 0.4s ease;
+}
+
+/* ─── RESET ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-void);
+  color: var(--text-base);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 50%, rgba(59,120,255,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at 80% 20%, rgba(200,155,60,0.04) 0%, transparent 70%);
+}
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────────────────────────── */
+h1, h2, h3, h4, .font-display { font-family: var(--font-display); }
+
+h1 { font-size: 2rem; font-weight: 700; color: var(--text-bright); letter-spacing: 0.08em; }
+h2 { font-size: 1.4rem; font-weight: 600; color: var(--gold-400); letter-spacing: 0.06em; }
+h3 { font-size: 1rem; font-weight: 600; color: var(--text-base); letter-spacing: 0.05em; }
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold-600); border-radius: 3px; }
+
+/* ─── SCREEN TRANSITIONS ─────────────────────────────────────────────────── */
+@keyframes screenEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen-enter { animation: screenEnter 0.35s ease both; }
+
+/* ─── BARS ───────────────────────────────────────────────────────────────── */
+.bar-track {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  height: 12px;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.4s ease;
+}
+.bar-hp { background: linear-gradient(90deg, #6B1A1A, #C04040); }
+.bar-mp { background: linear-gradient(90deg, #1A2E8B, #3B78FF); }
+.bar-energy { background: linear-gradient(90deg, #7A5C00, #F0B429); }
+
+/* ─── CARDS ──────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition), background var(--transition);
+}
+.card:hover { border-color: var(--border-base); background: var(--bg-hover); }
+.card.selected,
+.card.active { border-color: var(--gold-400); box-shadow: 0 0 20px rgba(200,155,60,0.2); }
+
+/* ─── BUTTONS ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  border: none;
+  outline: none;
+}
+.btn:disabled { opacity: 0.35; cursor: not-allowed !important; transform: none !important; }
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold-600), var(--gold-400));
+  color: var(--bg-void);
+  padding: 10px 24px;
+  font-weight: 700;
+}
+.btn-gold:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-base);
+  padding: 8px 18px;
+  border: 1px solid var(--border-base);
+}
+.btn-outline:hover:not(:disabled) { border-color: var(--gold-400); color: var(--gold-400); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  padding: 8px 14px;
+  border: 1px solid var(--border-dim);
+}
+.btn-ghost:hover:not(:disabled) { color: var(--text-base); border-color: var(--border-base); }
+
+/* ─── BADGES ─────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+.badge-melee  { background: rgba(200, 55, 55, 0.2); color: #FF8A8A; border: 1px solid rgba(200,55,55,0.35); }
+.badge-range  { background: rgba(59,120,255, 0.2); color: #7AB4FF; border: 1px solid rgba(59,120,255,0.35); }
+.badge-boss   { background: rgba(155, 89, 182, 0.25); color: #C39BD3; border: 1px solid rgba(155,89,182,0.4); }
+.badge-gold   { background: rgba(200,155,60,0.15); color: var(--gold-400); border: 1px solid var(--border-dim); }
+.badge-green  { background: rgba(0,200,83,0.15); color: #00C853; border: 1px solid rgba(0,200,83,0.3); }
+
+/* ─── ABILITY KEY TAGS ───────────────────────────────────────────────────── */
+.key-tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px;
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.key-q { background: rgba(0,229,212,0.15); color: var(--teal); border: 1px solid rgba(0,229,212,0.35); }
+.key-w { background: rgba(155,89,182,0.15); color: #C39BD3; border: 1px solid rgba(155,89,182,0.35); }
+.key-e { background: rgba(200,155,60,0.15); color: var(--gold-400); border: 1px solid var(--border-dim); }
+.key-r { background: rgba(200,55,55,0.15); color: #FF8A8A; border: 1px solid rgba(200,55,55,0.35); }
+.key-p { background: rgba(80,80,80,0.2); color: var(--text-base); border: 1px solid var(--border-dim); }
+
+/* ─── COMBAT LOG ─────────────────────────────────────────────────────────── */
+.log-player  { color: var(--mp-light); }
+.log-enemy   { color: var(--red-light); }
+.log-system  { color: var(--text-dim); font-style: italic; }
+.log-reward  { color: var(--gold-400); }
+.log-death   { color: var(--red-light); font-family: var(--font-display); font-size: 13px; }
+
+/* ─── STATUS EFFECT BADGES ───────────────────────────────────────────────── */
+.effect-stun    { background: rgba(240,180,40,0.2);  color: #F0B429; border: 1px solid rgba(240,180,40,0.35); }
+.effect-silence { background: rgba(80,80,80,0.2);    color: #AAA;    border: 1px solid rgba(128,128,128,0.3); }
+.effect-slow    { background: rgba(59,120,255,0.15); color: #7AB4FF; border: 1px solid rgba(59,120,255,0.3); }
+.effect-root    { background: rgba(0,200,83,0.15);   color: #00C853; border: 1px solid rgba(0,200,83,0.3); }
+.effect-bleed   { background: rgba(200,55,55,0.15);  color: #FF6B6B; border: 1px solid rgba(200,55,55,0.3); }
+.effect-undying { background: rgba(155,89,182,0.2);  color: #C39BD3; border: 1px solid rgba(155,89,182,0.35); }
+.effect-evade   { background: rgba(0,229,212,0.15);  color: var(--teal); border: 1px solid rgba(0,229,212,0.3); }
+.effect-expose  { background: rgba(200,155,60,0.15); color: var(--gold-400); border: 1px solid var(--border-dim); }
+
+/* ─── REGION COLORS ──────────────────────────────────────────────────────── */
+.r-demacia      { background: rgba(30, 64,128,0.12);  border-color: rgba(30,64,128,0.5); }
+.r-noxus        { background: rgba(139,26,26,0.12);   border-color: rgba(139,26,26,0.5); }
+.r-freljord     { background: rgba(26,74,107,0.12);   border-color: rgba(26,74,107,0.5); }
+.r-piltover     { background: rgba(122,92,0,0.12);    border-color: rgba(122,92,0,0.5); }
+.r-shadow       { background: rgba(45,27,78,0.12);    border-color: rgba(45,27,78,0.5); }
+.r-void         { background: rgba(58,0,128,0.12);    border-color: rgba(100,0,200,0.5); }
+
+/* ─── HEADER ─────────────────────────────────────────────────────────────── */
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-dim);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* ─── TOOLTIP ────────────────────────────────────────────────────────────── */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-mid);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  line-height: 1.5;
+  white-space: pre-line;
+  min-width: 200px;
+  max-width: 280px;
+  color: var(--text-base);
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+[data-tooltip]:hover::after { opacity: 1; }
+
+/* ─── UTILS ──────────────────────────────────────────────────────────────── */
+.text-gold   { color: var(--gold-400); }
+.text-bright { color: var(--text-bright); }
+.text-dim    { color: var(--text-dim); }
+.text-red    { color: var(--red-light); }
+.text-blue   { color: var(--mp-light); }
+.text-green  { color: var(--green); }
+.italic      { font-style: italic; }
+.flex        { display: flex; }
+.flex-col    { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center  { justify-content: center; }
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.w-full { width: 100%; }
+.text-center { text-align: center; }
+.font-display { font-family: var(--font-display); }
+.divider { border: none; border-top: 1px solid var(--border-dim); margin: 14px 0; }
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(200,155,60,0.4); }
+  50%      { box-shadow: 0 0 12px 3px rgba(200,155,60,0.15); }
+}
+.pulse { animation: pulse 2.5s infinite; }
+
+/* ─── MOBILE GLOBAL ──────────────────────────────────────────────────────── */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+/* Responsive base font */
+@media (max-width: 380px) { html { font-size: 14px; } }
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+/* Full-height screens */
+.screen-full { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }

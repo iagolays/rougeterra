@@ -165,20 +165,26 @@
 .btnAchievements:active { transform: translateY(0); }
 .btnAchievements .btnIcon { font-size: 22px; filter: drop-shadow(0 0 6px rgba(255,215,0,0.5)); }
 
-/* Secondary "New Game" button */
+/* Tertiary buttons (Patch Notes, Tutorial, References) */
 .btnTertiary {
   width: 100%;
-  padding: 8px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
+  padding: 9px 16px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-base);
   font-family: var(--font-display);
   font-size: 12px;
   letter-spacing: 0.06em;
   cursor: pointer;
-  transition: color 0.18s;
+  transition: all 0.18s;
+  backdrop-filter: blur(2px);
 }
-.btnTertiary:hover { color: var(--text-dim); }
+.btnTertiary:hover {
+  color: var(--gold-400);
+  border-color: var(--gold-400);
+  background: rgba(200, 155, 60, 0.1);
+}
 
 /* Save card */
 .saveCard {

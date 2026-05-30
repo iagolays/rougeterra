@@ -10,6 +10,7 @@
   gap: 16px;
   flex-wrap: wrap;
 }
+.shopHeaderActions { display: flex; align-items: center; gap: 10px; }
 .shopTitle { font-size: 1.5rem; color: var(--text-bright); margin-bottom: 4px; }
 .shopSub { font-size: 13px; color: var(--text-dim); }
 
@@ -46,7 +47,32 @@
   flex-direction: column;
   gap: 12px;
 }
-.bankHeader { display: flex; align-items: flex-start; justify-content: space-between; }
+.bankHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.bankUses {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--gold-400);
+  background: rgba(200,155,60,0.1);
+  border: 1px solid var(--border-dim);
+  border-radius: 20px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.bankUsesEmpty { color: var(--red-light); background: rgba(200,55,55,0.12); border-color: rgba(200,55,55,0.3); }
+
+/* Potion counters */
+.potionCounters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.potionCounter {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border-dim);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.potionFull { color: var(--gold-400); border-color: var(--gold-400); }
 .bankTitle { font-size: 1rem; color: var(--gold-400); margin-bottom: 4px; }
 .bankSub { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
 

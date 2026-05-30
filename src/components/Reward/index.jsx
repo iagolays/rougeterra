@@ -5,7 +5,9 @@
 import React, { useState } from "react";
 import { useGameStore } from "../../store/gameStore";
 import { SectionLabel } from "../UI";
+import InfoPanel from "../InfoPanel";
 import { REGIONS } from "../../data/regions";
+import { getItemPassives } from "../../data/itemEffects";
 import { applyItemStatsToPlayer, computeItemSynergies } from "../../game/combat";
 import styles from "./Reward.module.css";
 
@@ -123,7 +125,10 @@ export default function Reward() {
                 : "Hover an item to preview stat changes"}
             </div>
           </div>
-          <div className={styles.headerGold}>💰 {gold}</div>
+          <div className={styles.headerActions}>
+            <InfoPanel />
+            <div className={styles.headerGold}>💰 {gold}</div>
+          </div>
         </div>
       </div>
 
@@ -150,7 +155,6 @@ export default function Reward() {
               <div className={styles.itemBody}>
                 <div className={styles.itemName}>{item.name}</div>
                 <div className={styles.itemWorth}>Worth {item.gold.total}💰</div>
-                {item.plaintext && <div className={styles.itemPlain}>{item.plaintext}</div>}
                 {(Object.keys(deltas).length > 0 || newSynergies.length > 0) && (
                   <div className={styles.deltas}>
                     {Object.entries(deltas).map(([k, v]) => (
@@ -163,6 +167,9 @@ export default function Reward() {
                     ))}
                   </div>
                 )}
+                {getItemPassives(item).map((p, i) => (
+                  <div key={i} className={styles.passiveLine}>{p.icon} {p.text}</div>
+                ))}
               </div>
               <div className={styles.pickHint}>{inventoryFull ? "Swap ⇄" : "Pick →"}</div>
             </button>

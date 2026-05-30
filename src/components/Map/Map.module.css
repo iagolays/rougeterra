@@ -250,6 +250,8 @@
 .navBtnCombat:hover, .navBtnCombat:active { background: rgba(200,55,55,0.25); }
 
 .navBtnSecondary { flex: 1; }
+.navBtnUsed { opacity: 0.35; cursor: not-allowed; }
+.navBtnUsed:hover, .navBtnUsed:active { background: none; color: var(--text-dim); }
 
 /* ── Ability unlock modal ──────────────────────────────────────────────────── */
 .unlockOverlay {

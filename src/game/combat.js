@@ -76,6 +76,8 @@ export function resolveAbilityDamage(ability, player, combatCtx, target) {
   const armorPenPct   = player.itemStats?.armorPenPct || 0;
   const magicPenFlat  = player.itemStats?.magicPen    || 0;
   const critChance    = player.itemStats?.critChance  || 0;
+  // Attack speed → bonus physical damage (faster attacks = more hits per turn)
+  const atkSpeedBonus = 1 + (player.itemStats?.attackSpeedPct || 0) * 0.5;
 
   // Rabadon synergy: boost effective AP
   const effectiveAP = ap * (1 + (player.itemSynergies?.rabadonsAPBoost || 0));
@@ -90,13 +92,13 @@ export function resolveAbilityDamage(ability, player, combatCtx, target) {
     let p = 0, m = 0, t = 0;
     switch (ability.damageType) {
       case "adMult":
-        p = calculatePhysicalDamage(ad * ability.adMult, targetArmor, armorPenFlat, ability.armorPen ?? armorPenPct);
+        p = calculatePhysicalDamage(ad * ability.adMult * atkSpeedBonus, targetArmor, armorPenFlat, ability.armorPen ?? armorPenPct);
         break;
       case "apMult":
         m = calculateMagicDamage(effectiveAP * ability.apMult, targetMr, magicPenFlat);
         break;
       case "mixed":
-        p = calculatePhysicalDamage(ad * (ability.adMult || 0), targetArmor, armorPenFlat, armorPenPct);
+        p = calculatePhysicalDamage(ad * (ability.adMult || 0) * atkSpeedBonus, targetArmor, armorPenFlat, armorPenPct);
         m = calculateMagicDamage(effectiveAP * (ability.apMult || 0), targetMr, magicPenFlat);
         break;
       case "flat":
@@ -105,7 +107,7 @@ export function resolveAbilityDamage(ability, player, combatCtx, target) {
       case "execute": {
         const missingHpPct = 1 - target.currentHp / target.scaledStats.hp;
         const mult = (ability.baseExecuteMult || 2.5) + (ability.executeBonus || 0) * missingHpPct;
-        p = calculatePhysicalDamage(ad * mult, targetArmor, armorPenFlat, armorPenPct);
+        p = calculatePhysicalDamage(ad * mult * atkSpeedBonus, targetArmor, armorPenFlat, armorPenPct);
         break;
       }
       case "trueDmg":
@@ -174,6 +176,16 @@ export function applyPlayerAbility(ability, playerState, combatCtx, enemyState) 
       dmgType,
       text: `${player.champion.emoji} **${player.champion.name}** — *${ability.gameplayName}* ${dmgColor} **${dmgResult.total}** ${dmgType} dmg`,
     });
+
+    // Life steal — heal for % of physical damage dealt
+    const lifeSteal = player.itemStats?.lifeSteal || 0;
+    if (lifeSteal > 0 && dmgResult.physical > 0 && player.hp < player.maxHp) {
+      const healed = Math.round(dmgResult.physical * lifeSteal);
+      if (healed > 0) {
+        player = { ...player, hp: Math.min(player.maxHp, player.hp + healed) };
+        logEntries.push({ type: "system", text: `🩸 Robo de vida +${healed} HP` });
+      }
+    }
 
     if (combat.playerExpose > 0) combat = { ...combat, playerExpose: combat.playerExpose - 1 };
   } else {
@@ -414,6 +426,9 @@ export function resolveEnemyTurn(playerState, combatCtx, enemyState) {
     totalDamage += dmg;
   }
 
+  // Passive dodge chance from move speed (faster = harder to hit), capped at 25%
+  const moveDodge = Math.min(0.25, (player.itemStats?.moveSpeed || 0) * 0.004);
+
   // Defensive mechanics
   if (combat.playerAbsorbNext) {
     logEntries.push({ type: "system", text: `🌬️ Wind Wall blocks the attack!` });
@@ -428,6 +443,9 @@ export function resolveEnemyTurn(playerState, combatCtx, enemyState) {
   } else if (combat.playerEvade > 0 && Math.random() < (combat.playerEvadeChance || 0.4)) {
     logEntries.push({ type: "system", text: `💨 ${player.champion.name} dodges!` });
     combat = { ...combat, playerEvade: Math.max(0, combat.playerEvade - 1) };
+    totalDamage = 0;
+  } else if (moveDodge > 0 && Math.random() < moveDodge) {
+    logEntries.push({ type: "system", text: `💨 ${player.champion.name} esquiva (velocidad)!` });
     totalDamage = 0;
   } else {
     if (combat.playerShield > 0) {
@@ -476,13 +494,21 @@ export function resolveEnemyTurn(playerState, combatCtx, enemyState) {
     logEntries.push({ type: "system", text: `🌞 Sunfire 🔴 **${sunfire.stats.burnAura}** aura` });
   }
 
-  // Warmog regen (with synergy boost)
-  const warmog = (player.inventory || []).find(i => i.id === 3083 || i.stats?.hpRegen);
+  // Warmog regen (% of max HP per turn, with synergy boost)
+  const warmog = (player.inventory || []).find(i => i.id === 3083);
   if (warmog && player.hp > 0) {
-    const regenPct = player.itemSynergies?.warmogRegenBoost ? 0.04 : (warmog.stats?.hpRegen || 0.02);
+    const regenPct = player.itemSynergies?.warmogRegenBoost ? 0.04 : 0.02;
     const regenAmt = Math.round(player.maxHp * regenPct);
     player = { ...player, hp: Math.min(player.maxHp, player.hp + regenAmt) };
     logEntries.push({ type: "system", text: `❤️ Warmog's +${regenAmt} HP regen` });
+  }
+
+  // Flat HP regen per turn from hpRegen5 stat (e.g. Doran's Shield)
+  const regenStat = player.itemStats?.hpRegen5 || 0;
+  if (regenStat > 0 && player.hp > 0 && player.hp < player.maxHp) {
+    const flatRegen = Math.max(5, Math.round(regenStat * 10));
+    player = { ...player, hp: Math.min(player.maxHp, player.hp + flatRegen) };
+    logEntries.push({ type: "system", text: `❤️ Regeneración +${flatRegen} HP` });
   }
 
   // Tick enemy cooldowns
@@ -546,6 +572,11 @@ export function applyItemStatsToPlayer(basePlayer, inventory) {
   const rawAP = (basePlayer.baseAP || 0) + (bonuses.ap || 0);
   const effectiveAP = rawAP * (1 + (synergies.rabadonsAPBoost || 0));
 
+  // Resource pool: mana/energy items raise max resource (none-resource champs stay at 0)
+  const maxMp = basePlayer.resource === "none"
+    ? 0
+    : basePlayer.baseMaxMp + (bonuses.mp || 0);
+
   return {
     ...basePlayer,
     ad:    basePlayer.baseAD    + (bonuses.ad    || 0),
@@ -553,6 +584,7 @@ export function applyItemStatsToPlayer(basePlayer, inventory) {
     maxHp: basePlayer.baseMaxHp + (bonuses.hp    || 0),
     armor: basePlayer.baseArmor + (bonuses.armor || 0),
     mr:    basePlayer.baseMR    + (bonuses.mr    || 0),
+    maxMp,
     itemStats:    bonuses,
     itemSynergies: synergies,
   };

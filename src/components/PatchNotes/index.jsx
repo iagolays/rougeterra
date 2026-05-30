@@ -4,6 +4,40 @@ import styles from "./PatchNotes.module.css";
 
 const PATCHES = [
   {
+    version: "v0.4 — Objetos, Estados y Economía",
+    date: "May 2026",
+    sections: [
+      {
+        title: "Objetos: las estadísticas ahora funcionan de verdad",
+        items: [
+          "Robo de vida: te curas por el % indicado del daño físico que infliges (antes no hacía nada).",
+          "Velocidad de ataque: aumenta el daño de tus habilidades físicas.",
+          "Velocidad de movimiento: otorga probabilidad de esquivar ataques enemigos.",
+          "Maná/Recurso: los objetos de maná ahora aumentan tu reserva máxima.",
+          "Regeneración: recuperas HP al final de cada turno.",
+          "Las tarjetas de la tienda y de recompensa muestran las estadísticas y las pasivas/activas de cada objeto.",
+        ],
+      },
+      {
+        title: "Panel de información",
+        items: [
+          "Nueva pestaña «Estados» que explica qué hace cada efecto (aturdido, sangrado, expuesto, escudo, etc.).",
+          "El panel de info (ℹ) ahora también está disponible en la tienda y en la pantalla de recompensa.",
+          "El tutorial incluye un paso dedicado a los efectos de estado.",
+        ],
+      },
+      {
+        title: "Economía y correcciones",
+        items: [
+          "CORREGIDO: el destino lateral (Descansar/Evento) cambiaba al entrar y salir de la tienda. Ahora solo cambia tras cada combate.",
+          "El destino lateral solo puede usarse una vez por combate.",
+          "Límite de pociones: máximo 3 de vida y 5 de maná/energía, con indicador en la tienda.",
+          "El banco está limitado a 2 transacciones por partida, con indicador de las restantes.",
+        ],
+      },
+    ],
+  },
+  {
     version: "v0.3 — Tutorial & Guardado",
     date: "May 2026",
     sections: [

@@ -33,7 +33,7 @@ export default function Home() {
         <div className={styles.titleBlock}>
           <div className={styles.eyebrow}>A RUNETERRA ROGUELIKE</div>
           <h1 className={styles.title}>RogueTerra</h1>
-          <div className={styles.version}>v0.3 Open Beta</div>
+          <div className={styles.version}>v0.4 Open Beta</div>
         </div>
 
         {/* Saved run info */}

@@ -3,6 +3,7 @@
  */
 
 import React from "react";
+import { getItemPassives } from "../../data/itemEffects";
 import styles from "./UI.module.css";
 
 // ─── STAT BAR ─────────────────────────────────────────────────────────────────
@@ -127,6 +128,7 @@ const STAT_META = {
   magicPen:       { label: "Pen. M",  color: "#9B70C8" },
   armorPen:       { label: "Pen. F",  color: "#D4882A" },
   hpRegen5:       { label: "Regen",   color: "#80C840" },
+  mp:             { label: "Recurso", color: "#5090E0" },
   manaRestore:    { label: "Maná",    color: "#5090E0" },
   healNow:        { label: "Cura",    color: "#C04040" },
 };
@@ -143,6 +145,8 @@ export function ItemCard({ item, onBuy, canAfford = true, showCost = true, size 
   const visibleStats = Object.entries(item.stats || {})
     .filter(([k, v]) => v !== 0 && STAT_META[k])
     .map(([k, v]) => ({ key: k, value: formatStatValue(k, v), ...STAT_META[k] }));
+
+  const itemPassives = item.consumable ? [] : getItemPassives(item);
 
   const tooltipStats = Object.entries(item.stats || {})
     .filter(([, v]) => v !== 0)
@@ -187,6 +191,13 @@ export function ItemCard({ item, onBuy, canAfford = true, showCost = true, size 
               <span key={s.key} className={styles.statTag} style={{ color: s.color }}>
                 {s.value} {s.label}
               </span>
+            ))}
+          </div>
+        )}
+        {itemPassives.length > 0 && (
+          <div className={styles.passiveTags}>
+            {itemPassives.map((p, i) => (
+              <div key={i} className={styles.passiveTag}>{p.icon} {p.text}</div>
             ))}
           </div>
         )}

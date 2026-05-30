@@ -3,7 +3,13 @@
 .headerTop { display:flex; align-items:center; gap:12px; }
 .title { font-family:var(--font-display); font-size:1.3rem; color:var(--text-bright); }
 .sub { font-size:12px; color:var(--text-dim); font-style:italic; }
-.headerGold { margin-left:auto; font-family:var(--font-display); font-size:14px; color:var(--gold-400); }
+.headerActions { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.headerGold { font-family:var(--font-display); font-size:14px; color:var(--gold-400); }
+.passiveLine {
+  font-size:9px; color:var(--text-dim); line-height:1.45;
+  background:rgba(120,90,200,0.1); border-left:2px solid rgba(155,120,210,0.5);
+  border-radius:3px; padding:2px 6px; margin-top:4px; text-align:left;
+}
 .fullWarn { background:rgba(200,55,55,0.1); border:1px solid rgba(200,55,55,0.3); border-radius:var(--radius-md); padding:8px 12px; font-size:12px; color:var(--red-light); }
 
 .rewardGrid { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }

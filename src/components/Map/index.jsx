@@ -2,11 +2,12 @@
  * Map/index.jsx — Mobile-first redesign
  * Layout: champion header top → Runeterra map center → bottom nav bar
  */
-import React, { useState } from "react";
+import React from "react";
 import { useGameStore } from "../../store/gameStore";
 import { InventorySlot } from "../UI";
 import { REGIONS } from "../../data/regions";
 import RuneterraMap from "./RuneterraMap";
+import InfoPanel from "../InfoPanel";
 import styles from "./Map.module.css";
 
 // Static Runeterra map regions with approximate positions (% of image)
@@ -23,20 +24,18 @@ const DEST_FIXED = [
   { id: "combat", label: "Fight", icon: "⚔️", imgSrc: "/assets/items/1055.png", desc: "Enter combat" },
   { id: "shop",   label: "Shop",  icon: "🏪", imgSrc: "/assets/ui/coin.png",    desc: "Buy items"    },
 ];
-const DEST_VARIABLE = [
-  { id: "rest",  label: "Rest",  icon: "🏕️", desc: "Recover HP"   },
-  { id: "event", label: "Event", icon: "❓", imgSrc: "/assets/ui/missing_ping.png", desc: "Mystery event" },
-];
+const DEST_VARIABLE = {
+  rest:  { id: "rest",  label: "Rest",  icon: "🏕️", desc: "Recover HP"   },
+  event: { id: "event", label: "Event", icon: "❓", imgSrc: "/assets/ui/missing_ping.png", desc: "Mystery event" },
+};
 
 export default function Map() {
   const {
     player, gold, bank, regionIdx, combatIndex, totalKills, winStreak,
     chooseDestination, pendingUnlock, unlockAbility, dismissUnlock,
-    tutorialStep,
+    tutorialStep, sideDest, sideDestUsed,
   } = useGameStore();
-  const [varDest]    = useState(() => DEST_VARIABLE[Math.floor(Math.random() * DEST_VARIABLE.length)]);
-  const [showInfo, setShowInfo] = useState(false);
-  const [infoTab, setInfoTab]   = useState("abilities");
+  const varDest = DEST_VARIABLE[sideDest] || DEST_VARIABLE.rest;
 
   // Map tutorial targets: 0=champBar 1=inventoryWrap 2=mapArea 3=combatProgress 4=bottomNav
   const hl = (step) => tutorialStep === step ? "tutorial-highlight" : "";
@@ -107,9 +106,7 @@ export default function Map() {
         {player.inventory?.length === 0 && (
           <span className={styles.invEmpty}>No items yet</span>
         )}
-        <button className={styles.infoBtn} onClick={() => setShowInfo(true)} title="Ver habilidades y objetos">
-          ℹ
-        </button>
+        <InfoPanel className={styles.infoBtn} />
       </div>
 
       {/* ── MAP CENTER ──────────────────────────────────────────────────── */}
@@ -138,10 +135,14 @@ export default function Map() {
 
       {/* ── BOTTOM NAV ──────────────────────────────────────────────────── */}
       <nav className={`${styles.bottomNav} ${hl(4)}`}>
-        {/* Left: variable (rest or event) */}
-        <button className={`${styles.navBtn} ${styles.navBtnSecondary}`} onClick={() => chooseDestination(varDest.id)}>
+        {/* Left: variable (rest or event) — usable once per combat cycle */}
+        <button
+          className={`${styles.navBtn} ${styles.navBtnSecondary} ${sideDestUsed ? styles.navBtnUsed : ""}`}
+          onClick={() => chooseDestination(varDest.id)}
+          disabled={sideDestUsed}
+        >
           <NavIcon dest={varDest} big={false} />
-          <span className={styles.navLabel}>{varDest.label}</span>
+          <span className={styles.navLabel}>{sideDestUsed ? "Usado" : varDest.label}</span>
         </button>
 
         {/* Center: combat (always) */}
@@ -156,80 +157,6 @@ export default function Map() {
           <span className={styles.navLabel}>Shop</span>
         </button>
       </nav>
-
-      {/* ── INFO MODAL ───────────────────────────────────────────────────── */}
-      {showInfo && (
-        <div className={styles.infoOverlay} onClick={() => setShowInfo(false)}>
-          <div className={styles.infoModal} onClick={e => e.stopPropagation()}>
-            <div className={styles.infoHeader}>
-              <div className={styles.infoTabs}>
-                <button className={`${styles.infoTab} ${infoTab === "abilities" ? styles.infoTabActive : ""}`} onClick={() => setInfoTab("abilities")}>
-                  Habilidades
-                </button>
-                <button className={`${styles.infoTab} ${infoTab === "items" ? styles.infoTabActive : ""}`} onClick={() => setInfoTab("items")}>
-                  Objetos ({player.inventory?.length || 0})
-                </button>
-              </div>
-              <button className={styles.infoClose} onClick={() => setShowInfo(false)}>✕</button>
-            </div>
-
-            <div className={styles.infoBody}>
-              {infoTab === "abilities" && (
-                <div className={styles.infoList}>
-                  {player.champion.abilities.map(ab => {
-                    const unlocked = player.abilityUnlocked?.[ab.key];
-                    const imgUrl   = player.champion.abilityImages?.[ab.key];
-                    const costStr  = ab.costType !== "none" ? `${ab.cost} ${ab.costType}` : "Sin coste";
-                    const cdStr    = ab.cooldown > 0 ? `${ab.cooldown} turnos` : "Sin CD";
-                    return (
-                      <div key={ab.key} className={`${styles.infoRow} ${!unlocked ? styles.infoRowLocked : ""}`}>
-                        <div className={styles.infoIcon}>
-                          {imgUrl
-                            ? <img src={imgUrl} alt={ab.key} className={styles.infoImg} onError={e => e.target.style.display="none"} />
-                            : <div className={`key-tag key-${ab.key.toLowerCase()}`}>{ab.key}</div>
-                          }
-                          {!unlocked && <div className={styles.infoLockTag}>🔒</div>}
-                        </div>
-                        <div className={styles.infoText}>
-                          <div className={styles.infoName}>{ab.gameplayName} <span className={styles.infoKey}>[{ab.key}]</span></div>
-                          <div className={styles.infoDesc}>{ab.description}</div>
-                          <div className={styles.infoMeta}>{costStr} · CD: {cdStr}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {infoTab === "items" && (
-                <div className={styles.infoList}>
-                  {(player.inventory || []).length === 0 && (
-                    <p className={styles.infoEmpty}>No llevas ningún objeto.</p>
-                  )}
-                  {(player.inventory || []).map((item, i) => (
-                    <div key={i} className={styles.infoRow}>
-                      <div className={styles.infoIcon}>
-                        {item.imageUrl && <img src={item.imageUrl} alt={item.name} className={styles.infoImg} onError={e => e.target.style.display="none"} />}
-                      </div>
-                      <div className={styles.infoText}>
-                        <div className={styles.infoName}>{item.name} <span className={styles.infoGold}>· {item.gold?.total}💰</span></div>
-                        {item.plaintext && <div className={styles.infoPlain}>{item.plaintext}</div>}
-                        <div className={styles.infoStats}>
-                          {Object.entries(item.stats || {}).filter(([,v]) => v !== 0).map(([k, v]) => {
-                            const LABELS = { hp:"HP", ad:"AD", ap:"AP", armor:"Armor", mr:"MR", critChance:"Crit", attackSpeedPct:"Vel. Ataque", lifeSteal:"Robo Vida", moveSpeed:"Vel. Mov.", magicPen:"Pen. Mágica", armorPen:"Pen. Física", hpRegen5:"Regen HP" };
-                            const fv = (k === "critChance" || k === "attackSpeedPct" || k === "lifeSteal") ? `+${Math.round(v*100)}%` : `+${v}`;
-                            return <span key={k} className={styles.infoStat}>{fv} {LABELS[k] || k}</span>;
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── ABILITY UNLOCK MODAL ─────────────────────────────────────────── */}
       {pendingUnlock && (

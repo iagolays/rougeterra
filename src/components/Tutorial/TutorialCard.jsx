@@ -31,11 +31,16 @@ const STEPS = [
     title: "Elige tu destino",
     desc: "Cada turno puedes Luchar (necesario para avanzar), visitar la Tienda (compra objetos — el stock se renueva tras cada combate), o Descansar/explorar un Evento.",
   },
-  // ── Combat (5-8) ───────────────────────────────────────────────────────────
+  // ── Combat (5-9) ───────────────────────────────────────────────────────────
   {
     screen: "combat",
     title: "El enemigo",
-    desc: "Observa su HP, AD y Armor. Los efectos activos (stun, sangrado, AD reducido…) aparecen como badges de colores. En combates de élite pueden aparecer 2 enemigos — haz clic para cambiar de objetivo.",
+    desc: "Observa su HP, AD y Armor. En combates de élite pueden aparecer 2 enemigos — haz clic para cambiar de objetivo.",
+  },
+  {
+    screen: "combat",
+    title: "Efectos de estado",
+    desc: "Los efectos activos aparecen como badges de colores sobre cada combatiente: ⚡ Aturdido (pierde turno), 🌿 Enraizado, 🐢 Ralentizado (-30% daño), 🔇 Silenciado (sin habilidades), 🩸 Sangrado (daño por turno), 🎯 Expuesto (+30% daño), 🛡️ Escudo. Pulsa el botón ℹ → pestaña «Estados» para consultar qué hace cada uno en cualquier momento.",
   },
   {
     screen: "combat",

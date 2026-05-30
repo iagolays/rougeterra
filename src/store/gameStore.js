@@ -104,6 +104,26 @@ const RESOURCE_POTIONS = {
   },
 };
 
+// Potion carry limits per type
+export const POTION_LIMITS = { health: 3, mana: 5 };
+
+// Health potion = has healNow; Mana/resource potion = manaRestore only
+export function isHealthPotion(item) { return !!item?.stats?.healNow; }
+export function isManaPotion(item)   { return !!item?.stats?.manaRestore && !item?.stats?.healNow; }
+export function countPotions(consumables = []) {
+  let health = 0, mana = 0;
+  for (const c of consumables) {
+    if (isHealthPotion(c)) health++;
+    else if (isManaPotion(c)) mana++;
+  }
+  return { health, mana };
+}
+
+const SIDE_DESTS = ["rest", "event"];
+function pickSideDest() { return SIDE_DESTS[Math.floor(Math.random() * SIDE_DESTS.length)]; }
+
+const BANK_USES_PER_RUN = 2;
+
 function pickConsumableItems(allItems) {
   return Object.values(allItems)
     .filter(i => i.consumable && i.gold.purchasable && CONSUMABLE_EFFECTS[i.id])
@@ -391,6 +411,13 @@ export const useGameStore = create(
   acquiredLegendaryIds: [],
   combatLog:     [],
 
+  // Side destination (rest/event) — picked once per combat, usable once
+  sideDest:     "rest",
+  sideDestUsed: false,
+
+  // Bank transactions left this run
+  bankUsesLeft: 2,
+
   // Tutorial (0-8 = step index, null = not active)
   tutorialStep: null,
   tutorialDone: false,
@@ -445,6 +472,9 @@ export const useGameStore = create(
       pendingUnlock: ["Q", "W", "E"],
       shopItems:            buildShopStock(itemsData, champion.resource),
       acquiredLegendaryIds: [],
+      sideDest:             pickSideDest(),
+      sideDestUsed:         false,
+      bankUsesLeft:         BANK_USES_PER_RUN,
       tutorialStep:         tutorialDone ? null : 0,
       screen:               "map",
     });
@@ -465,17 +495,19 @@ export const useGameStore = create(
 
   // ─── MAP NAVIGATION ───────────────────────────────────────────────────────
   chooseDestination: (destType) => {
-    const { itemsData } = get();
     if (destType === "combat") {
       get().startCombat();
     } else if (destType === "shop") {
       // Shop stock is generated after each combat — just show the screen
       set({ screen: "shop" });
-    } else if (destType === "rest") {
-      get().doRest();
-    } else if (destType === "event") {
-      const ev = getRandomEvent();
-      set({ pendingEvent: ev, screen: "event" });
+    } else if (destType === "rest" || destType === "event") {
+      if (get().sideDestUsed) return; // already used this combat cycle
+      if (destType === "rest") {
+        get().doRest();
+      } else {
+        const ev = getRandomEvent();
+        set({ pendingEvent: ev, screen: "event" });
+      }
     }
   },
 
@@ -484,7 +516,7 @@ export const useGameStore = create(
     if (!pendingEvent) return;
     const state = get();
     const updates = pendingEvent.effect(state);
-    set({ ...updates, pendingEvent: null, screen: "map" });
+    set({ ...updates, pendingEvent: null, sideDestUsed: true, screen: "map" });
   },
 
   doRest: () => {
@@ -496,6 +528,7 @@ export const useGameStore = create(
           hp: Math.min(state.player.maxHp, state.player.hp + healAmt),
           mp: state.player.resource !== "none" ? state.player.maxMp : state.player.mp,
         },
+        sideDestUsed: true,
         screen: "map",
       };
     });
@@ -804,9 +837,9 @@ export const useGameStore = create(
         set({ screen: "victory", player: updatedPlayer });
         return;
       }
-      set({ regionIdx: regionIdx + 1, combatIndex: 0, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx + 1, excludeIds), shopItems: newShopItems, player: updatedPlayer });
+      set({ regionIdx: regionIdx + 1, combatIndex: 0, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx + 1, excludeIds), shopItems: newShopItems, player: updatedPlayer, sideDest: pickSideDest(), sideDestUsed: false });
     } else {
-      set({ combatIndex: newCombatIndex, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx, excludeIds), shopItems: newShopItems, player: updatedPlayer });
+      set({ combatIndex: newCombatIndex, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx, excludeIds), shopItems: newShopItems, player: updatedPlayer, sideDest: pickSideDest(), sideDestUsed: false });
     }
   },
 
@@ -843,6 +876,11 @@ export const useGameStore = create(
     const { gold, player } = get();
     if (gold < item.gold.total) return false;
     if (!item.consumable && (player?.inventory?.length || 0) >= 6) return "full";
+    if (item.consumable) {
+      const { health, mana } = countPotions(player?.consumables || []);
+      if (isHealthPotion(item) && health >= POTION_LIMITS.health) return "potion-limit";
+      if (isManaPotion(item)   && mana   >= POTION_LIMITS.mana)   return "potion-limit";
+    }
     set(state => {
       const newGold = state.gold - item.gold.total;
       const newShopItems = item.consumable
@@ -874,8 +912,8 @@ export const useGameStore = create(
     });
   },
 
-  depositBank:  (amt) => { const { gold, bank } = get(); const a = Math.min(amt, gold); if (a<=0) return false; set({ gold: gold-a, bank: bank+a }); return true; },
-  withdrawBank: (amt) => { const { gold, bank } = get(); const a = Math.min(amt, bank); if (a<=0) return false; set({ gold: gold+a, bank: bank-a }); return true; },
+  depositBank:  (amt) => { const { gold, bank, bankUsesLeft } = get(); if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, gold); if (a<=0) return false; set({ gold: gold-a, bank: bank+a, bankUsesLeft: bankUsesLeft-1 }); return true; },
+  withdrawBank: (amt) => { const { gold, bank, bankUsesLeft } = get(); if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, bank); if (a<=0) return false; set({ gold: gold+a, bank: bank-a, bankUsesLeft: bankUsesLeft-1 }); return true; },
   leaveShop:    () => set({ screen: "map" }),
 
   // ─── GAME OVER / RESTART ──────────────────────────────────────────────────
@@ -894,6 +932,7 @@ export const useGameStore = create(
       combatCtx: null, enemies: [], combatLog: [],
       pendingEvent: null, pendingUnlock: null,
       acquiredLegendaryIds: [], shopItems: [], rewardItems: [],
+      sideDest: pickSideDest(), sideDestUsed: false, bankUsesLeft: BANK_USES_PER_RUN,
       champPool: championsData ? pickChampionPool(Object.values(championsData)) : [],
       screen: "select",
     });
@@ -903,7 +942,8 @@ export const useGameStore = create(
     const { tutorialStep } = get();
     if (tutorialStep === null) return;
     const next = tutorialStep + 1;
-    if (next >= 9) {
+    // 10 steps total (0-9) — keep in sync with TutorialCard STEPS
+    if (next >= 10) {
       set({ tutorialStep: null, tutorialDone: true });
     } else {
       set({ tutorialStep: next });
@@ -951,6 +991,9 @@ export const useGameStore = create(
         totalCombats:         state.totalCombats,
         totalDamage:          state.totalDamage,
         winStreak:            state.winStreak,
+        sideDest:             state.sideDest,
+        sideDestUsed:         state.sideDestUsed,
+        bankUsesLeft:         state.bankUsesLeft,
         tutorialStep:         state.tutorialStep,
         tutorialDone:         state.tutorialDone,
       }),

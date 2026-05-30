@@ -27,7 +27,7 @@ Cada partida es única: los enemigos escalan con la dificultad, la tienda cambia
 | Campeón | Recurso | Estilo | Mecánica única |
 |---|---|---|---|
 | **Darius** | Ninguno | Bruiser cuerpo a cuerpo | Sistema de marcas Hemorragia: Q/W/E apilan marcas (máx 3). La R consume todas y añade +40% de daño por marca |
-| **Ashe** | Maná | Tiradora a distancia | Q golpea a todos los enemigos; R aturde 3 turnos |
+| **Ashe** | Maná | Tiradora a distancia | W golpea a todos los enemigos; R aturde 3 turnos |
 | **Akali** | Energía | Asesina mixta | E ¼ del daño tras 2 turnos; R tiene 2 partes — la Parte 2 escala con la vida que le falta al enemigo |
 
 ---

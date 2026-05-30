@@ -118,7 +118,12 @@ export default function Combat() {
               {/* Enemy info */}
               <div className={styles.enemyInfo}>
                 <div className={styles.enemyName}>{enemy.name}</div>
-                <EffectBadges effects={enemy.effects || []} />
+                <EffectBadges effects={[
+                  ...(enemy.effects || []),
+                  ...(isActive && (combatCtx.dariusMarks || 0) > 0
+                    ? [{ type: "hemorrhage", dur: combatCtx.dariusMarkTurns, stacks: combatCtx.dariusMarks }]
+                    : []),
+                ]} />
                 {!isDead && (
                   <>
                     <div className={styles.hpBarLabel}>{Math.max(0,enemy.currentHp)}/{enemy.scaledStats.hp}</div>

@@ -42,9 +42,16 @@ function pickChampionPool(allChampions) {
     .filter(Boolean);
 }
 
-function pickShopItems(allItems) {
+const LEGENDARY_THRESHOLD = 2500; // items at or above this gold value are unique per run
+
+function isLegendary(item) {
+  return !item.consumable && (item.gold?.total || 0) >= LEGENDARY_THRESHOLD;
+}
+
+function pickShopItems(allItems, excludeIds = new Set()) {
   const eligible = Object.values(allItems).filter(i =>
-    i.gold.purchasable && i.gold.total > 0 && !i.consumable && Object.keys(i.stats).length > 0
+    i.gold.purchasable && i.gold.total > 0 && !i.consumable &&
+    Object.keys(i.stats).length > 0 && !excludeIds.has(i.id)
   );
   return shuffle(eligible).slice(0, 6);
 }
@@ -102,9 +109,18 @@ function pickConsumableItems(allItems) {
     .map(i => ({ ...i, stats: { ...i.stats, ...CONSUMABLE_EFFECTS[i.id] } }));
 }
 
-function pickRewardItems(allItems, regionIdx) {
+function buildShopStock(itemsData, playerResource, excludeIds = new Set()) {
+  const equipment   = pickShopItems(itemsData || {}, excludeIds);
+  const consumables = pickConsumableItems(itemsData || {});
+  const resourcePotion = RESOURCE_POTIONS[playerResource];
+  const allConsumables = resourcePotion ? [resourcePotion, ...consumables] : consumables;
+  return [...allConsumables, ...equipment].slice(0, 9);
+}
+
+function pickRewardItems(allItems, regionIdx, excludeIds = new Set()) {
   const eligible = Object.values(allItems).filter(i =>
-    i.gold.purchasable && i.gold.total >= 800 && !i.consumable && Object.keys(i.stats).length > 0
+    i.gold.purchasable && i.gold.total >= 800 && !i.consumable &&
+    Object.keys(i.stats).length > 0 && !excludeIds.has(i.id)
   );
   const sorted = [...eligible].sort((a, b) => a.gold.total - b.gold.total);
   const tier = Math.min(sorted.length - 1, Math.floor(regionIdx * (sorted.length / 6)));
@@ -369,6 +385,7 @@ export const useGameStore = create((set, get) => ({
 
   shopItems:     [],
   rewardItems:   [],
+  acquiredLegendaryIds: [],   // legendary items already obtained this run
   combatLog:     [],
 
   // Event modal
@@ -408,6 +425,7 @@ export const useGameStore = create((set, get) => ({
 
   // ─── CHAMPION SELECT ──────────────────────────────────────────────────────
   selectChampion: (champion) => {
+    const { itemsData } = get();
     set({
       player:        buildBasePlayer(champion),
       gold:          100,
@@ -418,7 +436,9 @@ export const useGameStore = create((set, get) => ({
       totalDamage:   0,
       winStreak:     0,
       pendingUnlock: ["Q", "W", "E"],
-      screen:        "map",
+      shopItems:            buildShopStock(itemsData, champion.resource),
+      acquiredLegendaryIds: [],
+      screen:               "map",
     });
   },
 
@@ -441,12 +461,8 @@ export const useGameStore = create((set, get) => ({
     if (destType === "combat") {
       get().startCombat();
     } else if (destType === "shop") {
-      const { player } = get();
-      const shopItems  = pickShopItems(itemsData || {});
-      const consumables = pickConsumableItems(itemsData || {});
-      const resourcePotion = RESOURCE_POTIONS[player?.resource];
-      const allConsumables = resourcePotion ? [resourcePotion, ...consumables] : consumables;
-      set({ shopItems: [...allConsumables, ...shopItems].slice(0, 9), screen: "shop" });
+      // Shop stock is generated after each combat — just show the screen
+      set({ screen: "shop" });
     } else if (destType === "rest") {
       get().doRest();
     } else if (destType === "event") {
@@ -771,14 +787,18 @@ export const useGameStore = create((set, get) => ({
       ? { ...player, mp: player.maxMp }
       : player;
 
+    const { acquiredLegendaryIds } = get();
+    const excludeIds   = new Set(acquiredLegendaryIds);
+    const newShopItems = buildShopStock(itemsData, updatedPlayer.resource, excludeIds);
+
     if (newCombatIndex >= region.combatsPerRegion) {
       if (regionIdx >= REGIONS.length - 1) {
         set({ screen: "victory", player: updatedPlayer });
         return;
       }
-      set({ regionIdx: regionIdx + 1, combatIndex: 0, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx + 1), player: updatedPlayer });
+      set({ regionIdx: regionIdx + 1, combatIndex: 0, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx + 1, excludeIds), shopItems: newShopItems, player: updatedPlayer });
     } else {
-      set({ combatIndex: newCombatIndex, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx), player: updatedPlayer });
+      set({ combatIndex: newCombatIndex, screen: "reward", rewardItems: pickRewardItems(itemsData || {}, regionIdx, excludeIds), shopItems: newShopItems, player: updatedPlayer });
     }
   },
 
@@ -788,7 +808,10 @@ export const useGameStore = create((set, get) => ({
       const updatedInventory = [...state.player.inventory, item];
       const updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: updatedInventory }, updatedInventory);
       const synergies = computeItemSynergies(updatedInventory);
-      return { player: { ...updatedPlayer, itemSynergies: synergies }, screen: "map" };
+      const acquiredLegendaryIds = isLegendary(item)
+        ? [...state.acquiredLegendaryIds, item.id]
+        : state.acquiredLegendaryIds;
+      return { player: { ...updatedPlayer, itemSynergies: synergies }, acquiredLegendaryIds, screen: "map" };
     });
   },
 
@@ -800,23 +823,33 @@ export const useGameStore = create((set, get) => ({
       const newInv = [...inv, rewardItem];
       const updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: newInv }, newInv);
       const synergies = computeItemSynergies(newInv);
-      return { player: { ...updatedPlayer, itemSynergies: synergies }, screen: "map" };
+      const acquiredLegendaryIds = isLegendary(rewardItem)
+        ? [...state.acquiredLegendaryIds, rewardItem.id]
+        : state.acquiredLegendaryIds;
+      return { player: { ...updatedPlayer, itemSynergies: synergies }, acquiredLegendaryIds, screen: "map" };
     });
   },
 
   // ─── SHOP ─────────────────────────────────────────────────────────────────
   buyItem: (item) => {
-    const { gold } = get();
+    const { gold, player } = get();
     if (gold < item.gold.total) return false;
+    if (!item.consumable && (player?.inventory?.length || 0) >= 6) return "full";
     set(state => {
       const newGold = state.gold - item.gold.total;
+      const newShopItems = item.consumable
+        ? state.shopItems
+        : state.shopItems.filter(s => s !== item);
       if (item.consumable) {
-        return { gold: newGold, player: { ...state.player, consumables: [...(state.player.consumables || []), item] } };
+        return { gold: newGold, shopItems: newShopItems, player: { ...state.player, consumables: [...(state.player.consumables || []), item] } };
       }
       const inv = [...state.player.inventory, item];
       const updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: inv }, inv);
       const synergies = computeItemSynergies(inv);
-      return { gold: newGold, player: { ...updatedPlayer, itemSynergies: synergies } };
+      const acquiredLegendaryIds = isLegendary(item)
+        ? [...state.acquiredLegendaryIds, item.id]
+        : state.acquiredLegendaryIds;
+      return { gold: newGold, shopItems: newShopItems, acquiredLegendaryIds, player: { ...updatedPlayer, itemSynergies: synergies } };
     });
     return true;
   },

@@ -22,8 +22,9 @@ export default function Shop() {
 
   const handleBuy = (item) => {
     if (gold < item.gold.total) return;
-    const ok = buyItem(item);
-    if (ok) setLastBought(item.name);
+    const result = buyItem(item);
+    if (result === "full") setLastBought("❌ Inventario lleno — vende un objeto primero");
+    else if (result) setLastBought(`✅ ${item.name} añadido`);
   };
 
   const handleDeposit = () => {
@@ -44,8 +45,9 @@ export default function Shop() {
     setBankMsg({ text: `Withdrew ${amt}💰 from the bank.`, ok: true });
   };
 
-  const consumables  = shopItems.filter(i => i.consumable);
-  const equipment    = shopItems.filter(i => !i.consumable);
+  const consumables    = shopItems.filter(i => i.consumable);
+  const equipment      = shopItems.filter(i => !i.consumable);
+  const inventoryFull  = (player.inventory?.length || 0) >= 6;
 
   return (
     <div className={`${styles.screen} screen-enter`}>
@@ -75,13 +77,15 @@ export default function Shop() {
         {/* ── Equipment ─────────────────────────────────────────────── */}
         {equipment.length > 0 && (
           <section>
-            <SectionLabel>Equipment</SectionLabel>
+            <SectionLabel>
+              Equipment{inventoryFull ? " — ⚠️ Inventario lleno, vende primero" : ""}
+            </SectionLabel>
             <div className={styles.itemGrid}>
               {equipment.map(item => (
                 <ItemCard
                   key={item.id}
                   item={item}
-                  canAfford={gold >= item.gold.total}
+                  canAfford={gold >= item.gold.total && !inventoryFull}
                   showCost
                   size="md"
                   onBuy={handleBuy}

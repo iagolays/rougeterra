@@ -92,7 +92,7 @@ export const CHAMPION_CONFIGS = {
         cooldown: 0,
         effect: "debuffAD", debuffPct: 0.15, effectDur: 2,
         appliesMark: true,
-        description: "1.3× AD physical damage. Reduces the enemy's AD by 15% for 2 turns. Applies a Hemorrhage mark (3 turns).",
+        description: "1.3× AD physical damage. Reduces the enemy's AD by 15% for 2 turns. Applies a Hemorrhage mark (3 turns). Stack with Q and E before using R for maximum damage.",
       },
       {
         key: "E",

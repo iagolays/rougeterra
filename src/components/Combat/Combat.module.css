@@ -163,6 +163,19 @@
 
 .abilitiesBar { display: flex; gap: 5px; }
 
+/* Tooltip edge fix — first 2 buttons anchor left, last 2 anchor right */
+.abilitiesBar [data-tooltip]:nth-child(1)::after,
+.abilitiesBar [data-tooltip]:nth-child(2)::after {
+  left: 0;
+  transform: none;
+}
+.abilitiesBar [data-tooltip]:nth-last-child(1)::after,
+.abilitiesBar [data-tooltip]:nth-last-child(2)::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
 .abilityBtn {
   flex: 1;
   display: flex;

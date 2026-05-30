@@ -272,24 +272,28 @@ export function GameHeader({ player, gold, bank, regionName, rightContent }) {
 export function EffectBadges({ effects = [] }) {
   if (!effects.length) return null;
   const labels = {
-    stun: ["⚡", "Stunned"],
-    root: ["🌿", "Rooted"],
-    slow: ["🐢", "Slowed"],
-    silence: ["🔇", "Silenced"],
-    bleed: ["🩸", "Bleeding"],
-    undying: ["☠️", "Undying"],
-    evade: ["💨", "Evasion"],
-    expose: ["🎯", "Exposed"],
-    debuffAD: ["⬇️", "AD↓"],
+    stun:       ["⚡", "Stunned"],
+    root:       ["🌿", "Rooted"],
+    slow:       ["🐢", "Slowed"],
+    silence:    ["🔇", "Silenced"],
+    bleed:      ["🩸", "Bleeding"],
+    undying:    ["☠️", "Undying"],
+    evade:      ["💨", "Evasion"],
+    expose:     ["🎯", "Exposed"],
+    debuffAD:   ["⬇️", "AD↓"],
     selfBuffAD: ["⬆️", "AD↑"],
+    hemorrhage: ["🩸", "Hemorragia"],
   };
   return (
     <div className={styles.effectRow}>
       {effects.map((e, i) => {
         const [icon, name] = labels[e.type] || ["?", e.type];
+        const label = e.type === "hemorrhage"
+          ? `${icon} ${name} ×${e.stacks} (${e.dur}t)`
+          : `${icon} ${name} ${e.dur}t`;
         return (
           <span key={i} className={`badge ${styles.effectBadge} effect-${e.type}`}>
-            {icon} {name} {e.dur}t
+            {label}
           </span>
         );
       })}

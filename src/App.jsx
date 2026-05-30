@@ -12,6 +12,7 @@ import Event          from "./components/Event";
 import GameOver       from "./components/GameOver";
 import Victory        from "./components/Victory";
 import TutorialCard   from "./components/Tutorial/TutorialCard";
+import Jumpscare      from "./components/Jumpscare";
 
 export default function App() {
   const { screen, dataLoaded, dataError, loadData } = useGameStore();
@@ -39,6 +40,7 @@ export default function App() {
     <>
       {Page}
       <TutorialCard />
+      <Jumpscare />
     </>
   );
 }

@@ -1,0 +1,34 @@
+/* Jumpscare.module.css */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: flash 0.08s steps(2) 3;
+}
+
+.img {
+  width: 90vw;
+  max-width: 700px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 40px rgba(255, 60, 60, 0.7)) saturate(1.3) contrast(1.2);
+  animation: lunge 0.18s ease-out;
+}
+
+@keyframes lunge {
+  0%   { transform: scale(0.2); }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Rapid black/red flicker behind it for the startle effect */
+@keyframes flash {
+  0%   { background: #000; }
+  50%  { background: #3a0000; }
+  100% { background: #000; }
+}

@@ -16,6 +16,7 @@ import Jumpscare      from "./components/Jumpscare";
 import Achievements   from "./components/Achievements";
 import AchievementToast from "./components/Achievements/AchievementToast";
 import Credits        from "./components/Credits";
+import SorakaBlessing from "./components/SorakaBlessing";
 
 export default function App() {
   const { screen, dataLoaded, dataError, loadData } = useGameStore();
@@ -47,6 +48,7 @@ export default function App() {
       <TutorialCard />
       <Jumpscare />
       <AchievementToast />
+      <SorakaBlessing />
     </>
   );
 }

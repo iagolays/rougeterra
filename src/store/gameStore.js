@@ -443,6 +443,9 @@ export const useGameStore = create(
   tutorialStep: null,
   tutorialDone: false,
 
+  // Soraka boss-kill blessing overlay
+  sorakaBlessing: false,
+
   // Event modal
   pendingEvent:  null,
 
@@ -863,19 +866,35 @@ export const useGameStore = create(
       runGoldEarned: get().runGoldEarned + totalGold + streakBonus,
     });
 
-    // ── Moment-based achievements on victory ──
+    // ── Moment-based achievements on victory (use pre-blessing HP) ──
     if (newHp > 0 && newHp < player.maxHp * 0.1) get().unlockAchievement("superviviente");
     if (combat.moggeadorReady) get().unlockAchievement("moggeador");
     if (enemies.some(e => e.id === "void_watcher")) get().unlockAchievement("hall_fama");
     get()._checkAchievements(); // Cain (runGoldEarned) + any threshold reached
 
+    // ── Soraka's blessing: killing a boss fully restores HP and resource ──
+    const bossKilled = enemies.some(e => e.isBoss);
+    let finalPlayer = { ...player, hp: newHp, combatsWon: newCombatsWon, ultCharge: Math.min(player.ultChargeMax, (player.ultCharge || 0)) };
+    if (bossKilled) {
+      finalPlayer = {
+        ...finalPlayer,
+        hp: finalPlayer.maxHp,
+        mp: finalPlayer.resource !== "none" ? finalPlayer.maxMp : finalPlayer.mp,
+      };
+      get()._setState({ sorakaBlessing: true });
+    }
+
     return {
-      player:  { ...player, hp: newHp, combatsWon: newCombatsWon, ultCharge: Math.min(player.ultChargeMax, (player.ultCharge || 0)) },
+      player:  finalPlayer,
       combat:  { ...combat, over: true, result: "victory", turn: "player", pendingUnlock },
       enemies,
-      log:     victoryLog,
+      log:     bossKilled
+        ? [...victoryLog, { type: "system", text: "⭐ **Bendición de Soraka** — vida y recurso restaurados." }]
+        : victoryLog,
     };
   },
+
+  dismissSorakaBlessing: () => set({ sorakaBlessing: false }),
 
   proceedAfterCombat: () => {
     const { regionIdx, combatIndex, itemsData, combatCtx, player } = get();

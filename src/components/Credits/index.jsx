@@ -46,7 +46,7 @@ const SECTIONS = [
     title: "Otros recursos",
     items: [
       { text: "Iconos de interfaz (moneda, ping) procedentes de CommunityDragon.", url: "https://www.communitydragon.org/", label: "CommunityDragon" },
-      { text: "Imágenes del banner de derrota y de Poppy: arte de League of Legends propiedad de Riot Games." },
+      { text: "Imágenes del banner de derrota, de Poppy y de Soraka: arte de League of Legends propiedad de Riot Games." },
       { text: "Tipografías «Cinzel» y «Crimson Pro» vía Google Fonts.", url: "https://fonts.google.com/", label: "Google Fonts" },
     ],
   },

@@ -8,6 +8,7 @@ const SOUNDS = {
   levelup_click:   "/assets/sfx/levelup_click.wav",
   levelup_release: "/assets/sfx/levelup_release.wav",
   respawn:         "/assets/sfx/respawn.wav",
+  heal:            "/assets/sfx/heal.wav",
 };
 
 const cache = {};

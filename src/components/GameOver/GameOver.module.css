@@ -20,6 +20,19 @@
 .skull { font-size: 56px; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
 
+.banner {
+  width: 260px;
+  max-width: 70vw;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 30px rgba(200,55,55,0.4));
+  animation: bannerDrop 0.5s ease-out;
+}
+@keyframes bannerDrop {
+  0%   { transform: translateY(-20px) scale(0.9); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
 .title {
   font-size: 3rem;
   color: var(--red-light);

@@ -17,8 +17,13 @@ export default function GameOver() {
     <div className={`${styles.screen} screen-enter`}>
       <div className={styles.content}>
 
-        <div className={styles.skull}>💀</div>
-        <h1 className={styles.title}>Defeated</h1>
+        <img
+          src="/assets/ui/defeated_banner.png"
+          alt="Defeat"
+          className={styles.banner}
+          onError={e => { e.target.style.display = "none"; e.target.nextSibling.style.display = "block"; }}
+        />
+        <h1 className={styles.title} style={{ display: "none" }}>Defeated</h1>
         <p className={styles.sub}>
           {player.champion.name} has fallen in {region.name}
           {enemy ? ` — slain by ${enemy.name}` : ""}.

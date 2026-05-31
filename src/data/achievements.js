@@ -36,6 +36,9 @@ export const ACHIEVEMENTS = [
   { id: "superviviente", name: "Superviviente",  emoji: "❤️‍🩹", desc: "Sobrevive a un combate con menos del 10% de vida." },
   { id: "moggeador",    name: "Moggeador",       emoji: "⏳", desc: "Pasa el turno 10 veces seguidas y luego gana el combate." },
   { id: "hall_fama",    name: "Hall de la Fama", emoji: "🏆", imageUrl: "/assets/achievements/challenger.png", desc: "Derrota al Jefe del Vacío." },
+  // Multiplayer
+  { id: "brothers",    name: "HermanosBrothers", emoji: "👬", desc: "Gana una partida en Modo Cooperativo." },
+  { id: "king_track",  name: "Rey de pista",     emoji: "👑", desc: "Gana 3 enfrentamientos seguidos contra tu rival en Modo VS." },
 ];
 
 export const ACHIEVEMENTS_BY_ID = Object.fromEntries(ACHIEVEMENTS.map(a => [a.id, a]));

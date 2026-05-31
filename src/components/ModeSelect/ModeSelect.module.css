@@ -1,0 +1,256 @@
+.screen {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bg {
+  position: absolute; inset: 0;
+  background: url('/assets/map/runeterra.jpg') center / cover no-repeat;
+  filter: brightness(0.35) saturate(1.1);
+  z-index: 0;
+}
+.bgOverlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(1,10,19,0.5) 0%, rgba(1,10,19,0.85) 100%);
+  z-index: 1;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 40px;
+  gap: 24px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.backBtn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.backBtn:hover { color: var(--gold-400); }
+
+.header { text-align: center; }
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  color: var(--gold-100);
+  margin: 0 0 4px;
+}
+.subtitle { font-size: 13px; color: var(--text-dim); margin: 0; }
+
+/* ── Mode cards ── */
+.modes {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modeCard {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: rgba(10,22,40,0.85);
+  border: 1px solid rgba(var(--mode-color, 200,155,60), 0.3);
+  border-left: 3px solid var(--mode-color, #C89B3C);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  position: relative;
+}
+.modeCard:hover {
+  background: rgba(10,22,40,0.95);
+  border-color: var(--mode-color, #C89B3C);
+  transform: translateX(4px);
+}
+
+.modeIcon { font-size: 28px; flex-shrink: 0; }
+.modeInfo { flex: 1; }
+.modeName {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+.modeSub { font-size: 12px; color: var(--text-dim); font-family: var(--font-display); }
+.modeDesc { font-size: 12px; color: var(--text-dim); line-height: 1.4; margin-top: 4px; }
+
+.lockBadge {
+  font-size: 14px;
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  opacity: 0.6;
+}
+
+/* ── Auth prompt ── */
+.authBox {
+  width: 100%;
+  background: rgba(10,22,40,0.9);
+  border: 1px solid rgba(200,155,60,0.3);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.authIcon { font-size: 36px; }
+.authText { font-size: 14px; color: var(--text-dim); margin: 0; line-height: 1.5; }
+
+.btnGoogle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 20px;
+  background: #fff;
+  border: none;
+  border-radius: 8px;
+  color: #1f1f1f;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btnGoogle:hover { background: #f5f5f5; transform: translateY(-1px); }
+
+.cancelBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  padding: 4px;
+}
+.cancelBtn:hover { color: var(--text-dim); }
+
+/* ── Sub menu ── */
+.subMenu {
+  width: 100%;
+  background: rgba(10,22,40,0.85);
+  border: 1px solid rgba(200,155,60,0.25);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.subHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+}
+.subTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--gold-100);
+}
+
+.subOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.subBtn {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-base);
+  font-family: var(--font-display);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: left;
+}
+.subBtn:hover { background: rgba(200,155,60,0.1); border-color: var(--gold-400); color: var(--text-bright); }
+
+.subBtnPrimary {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #C89B3C, #A37A2A);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #0a0600;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.subBtnPrimary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+.subDesc { font-size: 13px; color: var(--text-dim); margin: 0; }
+
+.orDivider {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-display);
+}
+
+.codeRow { display: flex; gap: 8px; }
+.codeInput {
+  flex: 1;
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.codeInput::placeholder { color: var(--text-muted); letter-spacing: 0; font-size: 13px; }
+.codeInput:focus { outline: none; border-color: var(--gold-400); }
+
+.errorMsg {
+  font-size: 12px;
+  color: #FF6B6B;
+  background: rgba(255,107,107,0.1);
+  border: 1px solid rgba(255,107,107,0.25);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+}
+
+.backLink {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: left;
+  transition: color 0.15s;
+}
+.backLink:hover { color: var(--gold-400); }

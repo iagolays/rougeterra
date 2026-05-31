@@ -1,0 +1,131 @@
+.screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  background: url('/assets/map/runeterra.jpg') center / cover no-repeat;
+  filter: brightness(0.35) saturate(1.1);
+  z-index: 0;
+}
+
+.bgOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, transparent 30%, rgba(1,10,19,0.75) 100%),
+    linear-gradient(to bottom, rgba(1,10,19,0.4) 0%, transparent 40%, rgba(1,10,19,0.95) 100%);
+  z-index: 1;
+}
+
+.card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 40px 32px;
+  background: rgba(5, 15, 28, 0.85);
+  border: 1px solid rgba(200, 155, 60, 0.3);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  max-width: 360px;
+  width: calc(100% - 48px);
+}
+
+.titleBlock {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--gold-600);
+  text-transform: uppercase;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 10vw, 3.5rem);
+  font-weight: 900;
+  color: var(--gold-100, #F0E6C8);
+  line-height: 1;
+  text-shadow:
+    0 0 30px rgba(200,155,60,0.45),
+    0 2px 8px rgba(0,0,0,0.8);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.btnGoogle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 24px;
+  background: #fff;
+  border: none;
+  border-radius: 8px;
+  color: #1f1f1f;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+.btnGoogle:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+}
+.btnGoogle:active { transform: translateY(0); }
+.btnGoogle:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.googleIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.error {
+  font-size: 12px;
+  color: #ff6b6b;
+  text-align: center;
+  background: rgba(255,107,107,0.1);
+  border: 1px solid rgba(255,107,107,0.25);
+  border-radius: 6px;
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.disclaimer {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+}

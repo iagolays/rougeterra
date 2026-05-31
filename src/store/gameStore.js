@@ -400,6 +400,7 @@ export const useGameStore = create(
   dataError:     null,
 
   screen:        "loading",
+  gameMode:      "normal", // "normal" | "coop" | "vs"
   champPool:     [],
   player:        null,
   gold:          100,
@@ -567,11 +568,17 @@ export const useGameStore = create(
 
   // ─── COMBAT ───────────────────────────────────────────────────────────────
   startCombat: () => {
-    const { regionIdx, combatIndex, player } = get();
+    const { regionIdx, combatIndex, player, gameMode } = get();
     const region = REGIONS[regionIdx];
 
     // Build enemy group: 1 enemy normally, 2 on even combat indices, boss always solo
     const isBossFight = (combatIndex + 1) % region.bossEvery === 0;
+
+    // VS mode: boss positions trigger PvP instead of CPU combat
+    if (gameMode === "vs" && isBossFight) {
+      set({ screen: "vscombat" });
+      return;
+    }
     const enemyCount = isBossFight ? 1 : (combatIndex % 2 === 1 ? 2 : 1);
 
     const rawEnemies = [];
@@ -918,6 +925,9 @@ export const useGameStore = create(
     const newShopItems = buildShopStock(itemsData, updatedPlayer.resource, excludeIds);
 
     if (newCombatIndex >= region.combatsPerRegion) {
+      // Track region completion for leaderboard
+      try { import("./authStore").then(m => m.useAuthStore.getState().updateLeaderboardStats("region", region.id)); } catch {}
+
       if (regionIdx >= REGIONS.length - 1) {
         set({ screen: "victory", player: updatedPlayer });
         return;
@@ -1021,16 +1031,30 @@ export const useGameStore = create(
     get()._checkAchievements();
   },
 
-  depositBank:  (amt) => { const { gold, bank, bankUsesLeft } = get(); if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, gold); if (a<=0) return false; set({ gold: gold-a, bank: bank+a, bankUsesLeft: bankUsesLeft-1 }); get()._checkAchievements(); return true; },
+  depositBank:  (amt) => {
+    const { gold, bank, bankUsesLeft } = get();
+    if (bankUsesLeft <= 0) return "no-uses";
+    const a = Math.min(amt, gold);
+    if (a <= 0) return false;
+    const newBank = bank + a;
+    set({ gold: gold - a, bank: newBank, bankUsesLeft: bankUsesLeft - 1 });
+    get()._checkAchievements();
+    // Sync leaderboard bank stat (max ever)
+    try { import("./authStore").then(m => m.useAuthStore.getState().updateLeaderboardStats("bank", newBank)); } catch {}
+    return true;
+  },
   withdrawBank: (amt) => { const { gold, bank, bankUsesLeft } = get(); if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, bank); if (a<=0) return false; set({ gold: gold+a, bank: bank-a, bankUsesLeft: bankUsesLeft-1 }); return true; },
   leaveShop:    () => set({ screen: "map" }),
 
   // ─── GAME OVER / RESTART ──────────────────────────────────────────────────
   goToHome:         () => set({ screen: "home" }),
   goToSelect:       () => set({ screen: "select" }),
+  goToModeSelect:   () => set({ screen: "modeselect" }),
+  goToLeaderboard:  () => set({ screen: "leaderboard" }),
   goToPatchNotes:   () => set({ screen: "patchnotes" }),
   goToAchievements: () => set({ screen: "achievements" }),
   goToCredits:      () => set({ screen: "credits" }),
+  setGameMode:      (mode) => set({ gameMode: mode }),
 
   // ─── ACHIEVEMENTS ─────────────────────────────────────────────────────────
   unlockAchievement: (id) => {
@@ -1070,6 +1094,9 @@ export const useGameStore = create(
         try { if (a.check(ctx)) get().unlockAchievement(a.id); } catch { /* ignore */ }
       }
     }
+    // Sync achievement count for leaderboard
+    const count = get().unlockedAchievements.length;
+    try { import("./authStore").then(m => m.useAuthStore.getState().updateLeaderboardStats("achievements", count)); } catch {}
   },
 
   continueRun: () => set({ screen: "map" }),
@@ -1077,7 +1104,7 @@ export const useGameStore = create(
   startNewRun: () => {
     const { championsData, bank } = get();
     set({
-      player: null, gold: 100, bank,
+      player: null, gold: 100, bank, gameMode: "normal",
       regionIdx: 0, combatIndex: 0,
       totalCombats: 0, totalKills: 0, totalDamage: 0, winStreak: 0,
       combatCtx: null, enemies: [], combatLog: [],

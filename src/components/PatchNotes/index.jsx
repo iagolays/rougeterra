@@ -4,6 +4,53 @@ import styles from "./PatchNotes.module.css";
 
 const PATCHES = [
   {
+    version: "v0.7 — Multijugador & Leaderboard",
+    date: "May 2026",
+    sections: [
+      {
+        title: "Leaderboard global",
+        items: [
+          "Nuevo ranking global con 4 categorías: más oro en banco, victorias en VS, veces completada cada región y logros desbloqueados.",
+          "Requiere iniciar sesión con Google para acceder.",
+          "Accesible desde el menú principal con el botón 📊 Leaderboard.",
+        ],
+      },
+      {
+        title: "Selector de modo de juego",
+        items: [
+          "El botón «Jugar» ahora lleva a una pantalla de selección de modo: Normal, Cooperativo y VS.",
+          "Normal: juego offline como siempre, sin cambios. Tu progreso sigue contando para el leaderboard.",
+          "Cooperativo y VS requieren cuenta de Google.",
+        ],
+      },
+      {
+        title: "Modo Cooperativo (Online)",
+        items: [
+          "2 jugadores vs CPU. Conectaos mediante emparejamiento aleatorio o código de sala.",
+          "Sala de espera con código compartible, cuenta atrás y selección de campeón sincronizada.",
+          "Turnos alternos: J1 ataca → enemigo contraataca a J1 → J2 ataca → enemigo contraataca a J2...",
+          "El primer atacante alterna en cada combate para equilibrar la ventaja.",
+          "Oro compartido (el doble de lo habitual). Tiendas y recompensas individuales.",
+          "El banco está bloqueado en este modo.",
+          "Nuevo logro: HermanosBrothers 👬 — Gana en Modo Cooperativo.",
+        ],
+      },
+      {
+        title: "Modo VS (Online)",
+        items: [
+          "2 jugadores, cada uno con su propia partida independiente (oro, tienda, recompensas separados).",
+          "Al final de cada región, los jefes son reemplazados por un enfrentamiento PvP.",
+          "Antes de cada duelo ambos curan al 100% de vida. El enemigo refleja los stats reales del rival (AD, AP, armor con sus ítems).",
+          "El ganador de cada duelo acumula un punto de victoria. Al final el que más tenga gana.",
+          "La partida termina si mueres en un combate normal o en el enfrentamiento del Vacío.",
+          "Layout de combate rediseñado para VS: muestra HP, recursos e inventario del rival.",
+          "El banco está bloqueado en este modo. Los logros normales están desactivados.",
+          "Nuevo logro: Rey de pista 👑 — Gana 3 enfrentamientos seguidos contra tu rival.",
+        ],
+      },
+    ],
+  },
+  {
     version: "v0.6 — Objetos mejorados",
     date: "May 2026",
     sections: [

@@ -23,6 +23,7 @@ import Lobby          from "./components/Lobby";
 import Leaderboard    from "./components/Leaderboard";
 import CoopCombat     from "./components/CoopCombat";
 import VSCombat       from "./components/VSCombat";
+import { Analytics }  from "@vercel/analytics/react";
 
 export default function App() {
   const { screen, dataLoaded, dataError, loadData } = useGameStore();
@@ -69,6 +70,7 @@ export default function App() {
       <Jumpscare />
       <AchievementToast />
       <SorakaBlessing />
+      <Analytics />
     </>
   );
 }

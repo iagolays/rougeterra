@@ -85,7 +85,7 @@ export const useAuthStore = create((set, get) => ({
   updateLeaderboardStats: async (type, value) => {
     const { user } = useAuthStore.getState();
     if (!user) return;
-    const ref = doc(db, "users", user.uid, "stats", "leaderboard");
+    const ref = doc(db, "leaderboard", user.uid);
     try {
       // Always keep display info up to date
       const baseFields = { displayName: user.displayName || "Anónimo", photoURL: user.photoURL || null };

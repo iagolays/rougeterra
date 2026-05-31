@@ -1113,7 +1113,7 @@ export const useGameStore = create(
       sideDest: pickSideDest(), sideDestUsed: false, bankUsesLeft: BANK_USES_PER_RUN,
       runRested: false, runGoldEarned: 0, runInfoOpens: 0, runManaPotionsUsed: 0,
       champPool: championsData ? pickChampionPool(Object.values(championsData)) : [],
-      screen: "select",
+      screen: "modeselect",
     });
   },
 
@@ -1138,7 +1138,7 @@ export const useGameStore = create(
       set({ tutorialStep: 0, screen: "map" });
     } else {
       // No run yet: mark it pending so it shows when the next run starts
-      set({ tutorialDone: false, screen: "select" });
+      set({ tutorialDone: false, screen: "modeselect" });
     }
   },
 

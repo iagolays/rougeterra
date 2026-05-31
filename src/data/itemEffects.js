@@ -24,8 +24,8 @@ export function getItemPassives(item) {
     out.push({ icon: "💥", text: `Crítico: ${Math.round(s.critChance * 100)}% de probabilidad de asestar un golpe crítico (×1.75 daño).` });
   }
   if (s.moveSpeed > 0) {
-    const dodge = Math.min(25, Math.round(s.moveSpeed * 0.4));
-    out.push({ icon: "💨", text: `Velocidad: ${dodge}% de probabilidad de esquivar los ataques enemigos.` });
+    const dodge = Math.round(s.moveSpeed * 0.4);
+    out.push({ icon: "💨", text: `Velocidad: +${dodge}% de probabilidad de esquivar ataques enemigos (máx. 50% entre todos los objetos).` });
   }
   if (s.mp > 0) {
     out.push({ icon: "🔷", text: `Aumenta tu reserva de recurso en ${s.mp}.` });

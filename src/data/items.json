@@ -866,7 +866,8 @@
       "MagicPenetration"
     ],
     "stats": {
-      "moveSpeed": 45
+      "moveSpeed": 45,
+      "ap": 15
     },
     "gold": {
       "base": 800,

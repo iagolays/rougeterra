@@ -426,8 +426,8 @@ export function resolveEnemyTurn(playerState, combatCtx, enemyState) {
     totalDamage += dmg;
   }
 
-  // Passive dodge chance from move speed (faster = harder to hit), capped at 25%
-  const moveDodge = Math.min(0.25, (player.itemStats?.moveSpeed || 0) * 0.004);
+  // Passive dodge chance from move speed (faster = harder to hit), capped at 50%
+  const moveDodge = Math.min(0.50, (player.itemStats?.moveSpeed || 0) * 0.004);
 
   // Defensive mechanics
   if (combat.playerAbsorbNext) {

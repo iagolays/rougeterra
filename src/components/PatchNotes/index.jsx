@@ -4,6 +4,32 @@ import styles from "./PatchNotes.module.css";
 
 const PATCHES = [
   {
+    version: "v0.6 — Objetos mejorados",
+    date: "May 2026",
+    sections: [
+      {
+        title: "Esquiva y velocidad de movimiento",
+        items: [
+          "CORREGIDO: el tooltip de las botas mostraba el % de esquiva por objeto individual sin avisar del cap global — ahora muestra la contribución exacta de cada objeto y aclara el límite total.",
+          "El cap de esquiva por velocidad de movimiento sube de 25% a 50%, haciendo que apilar botas sea realmente útil.",
+        ],
+      },
+      {
+        title: "Sorcerer's Shoes",
+        items: [
+          "Ahora otorgan también +15 de Poder de Habilidad, además de los +45 de velocidad de movimiento y la penetración mágica.",
+        ],
+      },
+      {
+        title: "Objetos de vida",
+        items: [
+          "Al equipar un objeto que otorgue HP máximo, tu vida actual aumenta en la misma cantidad. Ejemplo: 200/300 HP + objeto de +500 HP → 700/800 HP.",
+          "Este comportamiento se aplica tanto al comprar en tienda como al coger recompensas de combate.",
+        ],
+      },
+    ],
+  },
+  {
     version: "v0.5 — Logros",
     date: "May 2026",
     sections: [

@@ -933,7 +933,10 @@ export const useGameStore = create(
   pickRewardItem: (item) => {
     set(state => {
       const updatedInventory = [...state.player.inventory, item];
-      const updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: updatedInventory }, updatedInventory);
+      const hpBefore = state.player.maxHp;
+      let updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: updatedInventory }, updatedInventory);
+      const hpGained = updatedPlayer.maxHp - hpBefore;
+      if (hpGained > 0) updatedPlayer = { ...updatedPlayer, hp: Math.min(updatedPlayer.maxHp, state.player.hp + hpGained) };
       const synergies = computeItemSynergies(updatedInventory);
       const acquiredLegendaryIds = isLegendary(item)
         ? [...state.acquiredLegendaryIds, item.id]
@@ -951,7 +954,10 @@ export const useGameStore = create(
     set(state => {
       const inv = state.player.inventory.filter((_, i) => i !== inventoryIndex);
       const newInv = [...inv, rewardItem];
-      const updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: newInv }, newInv);
+      const hpBefore = state.player.maxHp;
+      let updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: newInv }, newInv);
+      const hpGained = updatedPlayer.maxHp - hpBefore;
+      if (hpGained > 0) updatedPlayer = { ...updatedPlayer, hp: Math.min(updatedPlayer.maxHp, state.player.hp + hpGained) };
       const synergies = computeItemSynergies(newInv);
       const acquiredLegendaryIds = isLegendary(rewardItem)
         ? [...state.acquiredLegendaryIds, rewardItem.id]
@@ -982,7 +988,10 @@ export const useGameStore = create(
         return { gold: newGold, shopItems: newShopItems, player: { ...state.player, consumables: [...(state.player.consumables || []), item] } };
       }
       const inv = [...state.player.inventory, item];
-      const updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: inv }, inv);
+      const hpBefore = state.player.maxHp;
+      let updatedPlayer = applyItemStatsToPlayer({ ...state.player, inventory: inv }, inv);
+      const hpGained = updatedPlayer.maxHp - hpBefore;
+      if (hpGained > 0) updatedPlayer = { ...updatedPlayer, hp: Math.min(updatedPlayer.maxHp, state.player.hp + hpGained) };
       const synergies = computeItemSynergies(inv);
       const acquiredLegendaryIds = isLegendary(item)
         ? [...state.acquiredLegendaryIds, item.id]

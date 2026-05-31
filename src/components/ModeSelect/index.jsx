@@ -12,7 +12,8 @@ export default function ModeSelect() {
   const [selected, setSelected] = useState(null); // "normal" | "coop" | "vs"
   const [subMode, setSubMode] = useState(null);   // "matchmaking" | "code"
   const [codeInput, setCodeInput] = useState("");
-  const [needsAuth, setNeedsAuth] = useState(false); // show auth prompt
+  const [needsAuth, setNeedsAuth] = useState(false);
+  const [searching, setSearching] = useState(false);
 
   // Once user logs in while needsAuth is shown, auto-proceed
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function ModeSelect() {
 
   const handleCreateLobby = () => createLobby(selected);
   const handleJoinByCode = () => { if (codeInput.trim()) joinByCode(codeInput); };
-  const handleMatchmaking = () => joinMatchmaking(selected);
+  const handleMatchmaking = () => { setSearching(true); joinMatchmaking(selected); };
 
   const MODES = [
     { id: "normal", icon: "⚔️", title: "Normal", subtitle: "Solo vs CPU", color: "#C89B3C",
@@ -114,9 +115,20 @@ export default function ModeSelect() {
               </div>
             ) : subMode === "matchmaking" ? (
               <div className={styles.subOptions}>
-                <p className={styles.subDesc}>Buscaremos automáticamente a otro jugador disponible.</p>
-                <button className={styles.subBtnPrimary} onClick={handleMatchmaking}>🔍 Buscar partida</button>
-                <button className={styles.backLink} onClick={() => setSubMode(null)}>← Volver</button>
+                {!searching ? (
+                  <>
+                    <p className={styles.subDesc}>Buscaremos automáticamente a otro jugador disponible.</p>
+                    <button className={styles.subBtnPrimary} onClick={handleMatchmaking}>🔍 Buscar partida</button>
+                    <button className={styles.backLink} onClick={() => setSubMode(null)}>← Volver</button>
+                  </>
+                ) : (
+                  <div className={styles.searchingBox}>
+                    <div className={styles.searchingSpinner}>⟳</div>
+                    <div className={styles.searchingTitle}>Buscando rival...</div>
+                    <p className={styles.searchingDesc}>En cuanto haya otro jugador disponible, comenzará la cuenta atrás.</p>
+                    <button className={styles.backLink} onClick={() => { setSearching(false); useMultiplayerStore.getState().cancelMatchmaking(); }}>✕ Cancelar búsqueda</button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className={styles.subOptions}>

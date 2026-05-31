@@ -129,8 +129,8 @@ export function countPotions(consumables = []) {
   return { health, mana };
 }
 
-const SIDE_DESTS = ["rest", "event"];
-function pickSideDest() { return SIDE_DESTS[Math.floor(Math.random() * SIDE_DESTS.length)]; }
+// Bias the side destination toward rest (65%) over a random event (35%).
+function pickSideDest() { return Math.random() < 0.65 ? "rest" : "event"; }
 
 const BANK_USES_PER_RUN = 2;
 

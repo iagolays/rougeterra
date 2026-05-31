@@ -40,9 +40,9 @@ export default function ModeSelect() {
   const MODES = [
     { id: "normal", icon: "⚔️", title: "Normal", subtitle: "Solo vs CPU", color: "#C89B3C",
       desc: "Aventúrate por las regiones de Runeterra. Tu progreso cuenta para el leaderboard." },
-    { id: "coop", icon: "👥", title: "Cooperativo", subtitle: "2 jugadores vs CPU", color: "#00C853",
+    { id: "coop", icon: "👥", title: "Cooperativo", subtitle: "2 jugadores vs CPU", color: "#00C853", wip: true,
       desc: "Forma equipo con un compañero. Compartid oro y estrategia para vencer al Vacío." },
-    { id: "vs", icon: "🏆", title: "VS", subtitle: "Jugador vs Jugador", color: "#E53935",
+    { id: "vs", icon: "🏆", title: "VS", subtitle: "Jugador vs Jugador", color: "#E53935", wip: true,
       desc: "Compite cara a cara. Os enfrentaréis al final de cada región. El más victorioso gana." },
   ];
 
@@ -88,6 +88,7 @@ export default function ModeSelect() {
                 <div className={styles.modeInfo}>
                   <div className={styles.modeName}>{mode.title} <span className={styles.modeSub}>— {mode.subtitle}</span></div>
                   <div className={styles.modeDesc}>{mode.desc}</div>
+                  {mode.wip && <div className={styles.wipBadge}>🚧 En desarrollo — puede no funcionar correctamente</div>}
                 </div>
                 {mode.id !== "normal" && !user && <span className={styles.lockBadge}>🔒</span>}
               </button>
@@ -101,6 +102,10 @@ export default function ModeSelect() {
             <div className={styles.subHeader}>
               <span>{MODES.find(m => m.id === selected)?.icon}</span>
               <span className={styles.subTitle}>{MODES.find(m => m.id === selected)?.title}</span>
+            </div>
+
+            <div className={styles.wipWarning}>
+              🚧 <strong>Modo en desarrollo.</strong> Esta función todavía no funciona correctamente y puede dar errores. Úsala bajo tu propia cuenta y riesgo.
             </div>
 
             {!subMode ? (

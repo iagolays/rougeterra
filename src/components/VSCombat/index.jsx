@@ -134,9 +134,7 @@ export default function VSCombat() {
         </div>
         <StatBar current={myHp} max={myMaxHp} type="hp" />
         {myMaxMp > 0 && <StatBar current={myMp} max={myMaxMp} type={player?.resource === "energy" ? "energy" : "mp"} />}
-        {(player?.combatCtx?.playerShield > 0 || player?.combatCtx?.playerEvade > 0) && (
-          <EffectBadges combatCtx={player?.combatCtx} />
-        )}
+        <EffectBadges effects={myPvpState.effects || []} />
         <div className={styles.inventory}>
           {(player?.inventory || []).map((item, i) => <InventorySlot key={i} item={item} index={i} />)}
           {Array.from({ length: Math.max(0, 6 - (player?.inventory?.length || 0)) }).map((_, i) => (
@@ -169,6 +167,7 @@ export default function VSCombat() {
         </div>
         <StatBar current={rivalHp} max={rivalMaxHp} type="hp" />
         {rivalMaxMp > 0 && <StatBar current={rivalMp} max={rivalMaxMp} type={rivalPvpState.resource === "energy" ? "energy" : "mp"} />}
+        <EffectBadges effects={rivalPvpState.effects || []} />
         <div className={styles.inventory}>
           {(rivalPvpState.inventory || []).map((item, i) => <InventorySlot key={i} item={item} index={i} />)}
           {Array.from({ length: Math.max(0, 6 - (rivalPvpState.inventory?.length || 0)) }).map((_, i) => (

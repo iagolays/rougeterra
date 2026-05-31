@@ -19,6 +19,15 @@ function generateCode() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
+// Deterministic lobby code from the two paired UIDs — both clients compute the
+// same code without writing to each other's docs (which security rules forbid).
+function pairCode(a, b) {
+  const s = `${a}_${b}`;
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return ("MM" + h.toString(36).toUpperCase()).slice(0, 6).padEnd(6, "0");
+}
+
 function playerSyncState(player) {
   if (!player) return { hp: 100, maxHp: 100, mp: 0, maxMp: 0, itemStats: {}, armor: 0, mr: 0, ad: 20, ap: 0, effects: [], inventory: [] };
   return {
@@ -77,6 +86,7 @@ export const useMultiplayerStore = create((set, get) => ({
   matchmakingStatus: "idle",
   error: null,
   vsConsecutiveWins: 0,
+  lastOutcomeRound: 0,
 
   // ── Lobby creation ──────────────────────────────────────────────────────
 
@@ -135,57 +145,47 @@ export const useMultiplayerStore = create((set, get) => ({
       displayName: user.displayName,
       photoURL: user.photoURL || null,
       timestamp: Date.now(),
-      lobbyCode: null,
     });
 
-    // Escucha la colección de matchmaking para este modo
+    let handled = false; // ensure we only pair once
+
+    // Watch the matchmaking queue for this mode. Each client only ever writes
+    // its OWN matchmaking doc + its own lobby (security-rule safe). Pairing is
+    // deterministic: sort searching UIDs, the two lowest form a pair, the lower
+    // one is the host. Both clients derive the same lobby code via pairCode().
     if (unsubMatchmaking) unsubMatchmaking();
     unsubMatchmaking = onSnapshot(
       query(collection(db, "matchmaking"), where("mode", "==", mode)),
       async (snap) => {
-        // ¿Ya me emparejaron? (alguien escribió lobbyCode en mi entrada)
-        const myDoc = snap.docs.find(d => d.id === user.uid);
-        const existingCode = myDoc?.data()?.lobbyCode;
-        if (existingCode) {
-          unsubMatchmaking?.();
-          unsubMatchmaking = null;
-          try { await deleteDoc(myRef); } catch {}
-          set({ lobbyCode: existingCode, isHost: false, matchmakingStatus: "found" });
-          get()._subscribeLobby(existingCode);
-          useGameStore.getState().setGameMode(mode);
-          useGameStore.getState()._setState({ screen: "lobby" });
-          return;
-        }
+        if (handled) return;
+        const ids = snap.docs.map(d => d.id).sort();
+        if (ids.length < 2) return;
 
-        // Busco rivales esperando sin lobby asignado
-        const others = snap.docs.filter(d => d.id !== user.uid && !d.data().lobbyCode);
-        if (others.length === 0) return;
+        const [a, b] = ids; // two lowest UIDs form the pair
+        if (user.uid !== a && user.uid !== b) return; // not in this pair — keep waiting
 
-        // UID más bajo crea el lobby (evita que ambos creen a la vez)
-        const other = others[0];
-        if (user.uid > other.id) return;
-
-        // Creo el lobby
-        let code = generateCode();
-        let lobbySnap = await getDoc(doc(db, "lobbies", code));
-        while (lobbySnap.exists()) { code = generateCode(); lobbySnap = await getDoc(doc(db, "lobbies", code)); }
-
-        const otherData = other.data();
-        const otherUid = other.id;
-        const lobbyData = buildLobbyData(mode, user, user.uid, otherUid, otherData);
-        await setDoc(doc(db, "lobbies", code), lobbyData);
-
-        // Asigno el lobby a ambas entradas de matchmaking
-        await updateDoc(myRef, { lobbyCode: code });
-        try { await updateDoc(doc(db, "matchmaking", otherUid), { lobbyCode: code }); } catch {}
-
+        handled = true;
         unsubMatchmaking?.();
         unsubMatchmaking = null;
-        try { await deleteDoc(myRef); } catch {}
-        set({ lobbyCode: code, isHost: true, matchmakingStatus: "found" });
+
+        const code = pairCode(a, b);
+        const iAmHost = user.uid === a;
+        const otherUid = iAmHost ? b : a;
+        const otherData = snap.docs.find(d => d.id === otherUid)?.data() || {};
+
+        if (iAmHost) {
+          const existing = await getDoc(doc(db, "lobbies", code));
+          if (!existing.exists()) {
+            const lobbyData = buildLobbyData(mode, user, user.uid, otherUid, otherData);
+            await setDoc(doc(db, "lobbies", code), lobbyData);
+          }
+        }
+        // Both subscribe — onSnapshot fires when the host creates the doc.
+        set({ lobbyCode: code, isHost: iAmHost, matchmakingStatus: "found" });
         get()._subscribeLobby(code);
         useGameStore.getState().setGameMode(mode);
         useGameStore.getState()._setState({ screen: "lobby" });
+        try { await deleteDoc(myRef); } catch {}
       }
     );
   },
@@ -212,6 +212,12 @@ export const useMultiplayerStore = create((set, get) => ({
       const myUid = user.uid;
       const gameScreen = useGameStore.getState().screen;
 
+      // Lobby is the source of truth for game mode — keep gameStore in sync so
+      // the bank stays locked and VS boss positions trigger PvP (not CPU).
+      if (lobby.mode && useGameStore.getState().gameMode !== lobby.mode) {
+        useGameStore.getState().setGameMode(lobby.mode);
+      }
+
       // ── Host: cuenta atrás cuando llegan 2 jugadores ──
       if (isHost && lobby.status === "waiting" && Object.keys(lobby.players || {}).length === 2 && !lobby.countdownStartedAt) {
         updateDoc(doc(db, "lobbies", code), { status: "countdown", countdownStartedAt: Date.now() });
@@ -222,20 +228,32 @@ export const useMultiplayerStore = create((set, get) => ({
         useGameStore.getState()._setState({ screen: "map" });
       }
 
-      // ── COOP: auto-llevar al compañero a coopcombat cuando uno señala listo ──
-      if (lobby.mode === "coop" && lobby.coopCombat?.readyToFight) {
-        const partnerUid = Object.keys(lobby.players || {}).find(u => u !== myUid);
-        const partnerReady = partnerUid && lobby.coopCombat.readyToFight[partnerUid];
+      // ── COOP: mantener a ambos en la pantalla de combate ──
+      if (lobby.mode === "coop" && lobby.coopCombat) {
+        const playerUids = Object.keys(lobby.players || {});
+        const partnerUid = playerUids.find(u => u !== myUid);
+        const partnerReady = partnerUid && lobby.coopCombat.readyToFight?.[partnerUid];
+        const ccStatus = lobby.coopCombat.status;
 
-        if (partnerReady && gameScreen === "map") {
+        // Si el compañero pulsó "Luchar" o el combate ya está activo, únete a la
+        // pantalla de combate (desde el mapa, tienda, recompensa, etc.).
+        const shouldJoinCombat = (partnerReady || ccStatus === "active");
+        if (shouldJoinCombat && gameScreen !== "coopcombat" && (gameScreen === "map" || gameScreen === "shop" || gameScreen === "reward")) {
           useGameStore.getState()._setState({ screen: "coopcombat" });
         }
 
         // Host: cuando ambos están listos, inicia el combate
-        const playerUids = Object.keys(lobby.players || {});
-        const allReady = playerUids.length === 2 && playerUids.every(uid => lobby.coopCombat.readyToFight[uid]);
-        if (isHost && allReady && lobby.coopCombat.status === "idle") {
+        const allReady = playerUids.length === 2 && playerUids.every(uid => lobby.coopCombat.readyToFight?.[uid]);
+        if (isHost && allReady && ccStatus === "idle") {
           get()._initCoopCombat(lobby);
+        }
+
+        // Ambos: al terminar el combate, ir a recompensa/gameover (una sola vez).
+        const oc = lobby.coopCombat;
+        if (oc.outcomeRound && oc.outcomeRound !== get().lastOutcomeRound) {
+          set({ lastOutcomeRound: oc.outcomeRound });
+          if (oc.lastOutcome === "victory") useGameStore.getState()._setState({ screen: "reward" });
+          else if (oc.lastOutcome === "defeat") useGameStore.getState()._setState({ screen: "gameover" });
         }
       }
 
@@ -443,26 +461,21 @@ export const useMultiplayerStore = create((set, get) => ({
       "coopCombat.activePlayerUid": otherUid,
     };
 
-    if (victory) update["coopCombat.status"] = "victory";
-    if (defeat)  update["coopCombat.status"] = "defeat";
+    if (victory || defeat) {
+      // Outcome counter lets BOTH clients react once (see _subscribeLobby).
+      const round = (cc.outcomeRound || 0) + 1;
+      update["coopCombat.status"] = "idle";          // ready for the next fight
+      update["coopCombat.readyToFight"] = {};
+      update["coopCombat.lastOutcome"] = victory ? "victory" : "defeat";
+      update["coopCombat.outcomeRound"] = round;
+      if (victory) {
+        const goldReward = (enemies[0]?.goldReward || 50) * 2;
+        update["coopGold"] = (lobby.coopGold || 200) + goldReward;
+        update["coopCombatIndex"] = (lobby.coopCombatIndex || 0) + 1;
+      }
+    }
 
     await updateDoc(doc(db, "lobbies", lobbyCode), update);
-
-    if (victory) {
-      const goldReward = (enemies[0]?.goldReward || 50) * 2;
-      const newGold = (lobby.coopGold || 200) + goldReward;
-      const newIdx = (lobby.coopCombatIndex || 0) + 1;
-      await updateDoc(doc(db, "lobbies", lobbyCode), {
-        coopGold: newGold,
-        coopCombatIndex: newIdx,
-        "coopCombat.readyToFight": {},
-        "coopCombat.status": "idle",
-      });
-      useGameStore.getState()._setState({ gold: newGold, screen: "reward" });
-    }
-    if (defeat) {
-      useGameStore.getState()._setState({ screen: "gameover" });
-    }
   },
 
   // ── VS PvP ──────────────────────────────────────────────────────────────

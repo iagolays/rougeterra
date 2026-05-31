@@ -102,6 +102,27 @@
   opacity: 0.6;
 }
 
+.wipBadge {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #F0B429;
+  background: rgba(240, 180, 41, 0.1);
+  border: 1px solid rgba(240, 180, 41, 0.3);
+  border-radius: 4px;
+  padding: 3px 8px;
+  display: inline-block;
+}
+
+.wipWarning {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #F0B429;
+  background: rgba(240, 180, 41, 0.1);
+  border: 1px solid rgba(240, 180, 41, 0.4);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
 /* ── Auth prompt ── */
 .authBox {
   width: 100%;

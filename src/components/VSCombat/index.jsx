@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { useMultiplayerStore } from "../../store/multiplayerStore";
 import { useAuthStore } from "../../store/authStore";
 import { useGameStore } from "../../store/gameStore";
-import { InventorySlot } from "../UI";
+import { StatBar, EffectBadges, InventorySlot } from "../UI";
 import { REGIONS } from "../../data/regions";
 import styles from "./VSCombat.module.css";
 
 export default function VSCombat() {
-  const { lobby, lobbyCode, signalReadyForPvP, submitVsPvpAction, isHost } = useMultiplayerStore();
+  const { lobby, signalReadyForPvP, submitVsPvpAction, isHost } = useMultiplayerStore();
   const { user } = useAuthStore();
-  const { player, regionIdx } = useGameStore();
+  const { player, regionIdx, proceedAfterCombat } = useGameStore();
   const logRef = useRef(null);
   const [readySignaled, setReadySignaled] = useState(false);
 
@@ -28,31 +28,30 @@ export default function VSCombat() {
   const myPvpState = pvp?.playerStates?.[myUid] || {};
   const rivalPvpState = pvp?.playerStates?.[rivalUid] || {};
   const isMyTurn = pvp?.turnUid === myUid;
+  const winnerUid = pvp?.winnerUid;
+  const iWon = winnerUid === myUid;
 
   const vsReady = lobby?.vsState || {};
   const iReady = vsReady[myUid]?.readyForPvP || false;
   const rivalReady = vsReady[rivalUid]?.readyForPvP || false;
 
-  // Auto-scroll log
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [pvp?.logTail]);
 
-  // Host triggers PvP init when both are ready
   useEffect(() => {
     if (isHost && iReady && rivalReady && pvpStatus === "idle") {
       useMultiplayerStore.getState()._initVsPvp(lobby);
     }
   }, [iReady, rivalReady, pvpStatus, isHost]);
 
-  const handleReady = async () => {
-    setReadySignaled(true);
-    await signalReadyForPvP();
-  };
+  const handleReady = async () => { setReadySignaled(true); await signalReadyForPvP(); };
+  const handleContinue = () => { setReadySignaled(false); proceedAfterCombat(); };
 
   const abilities = player?.champion?.abilities?.filter(a => a.key !== "P") || [];
+  const abilityImages = player?.champion?.abilityImages || {};
 
-  // ── Waiting for both to be ready ──
+  // ── Waiting for both ──
   if (pvpStatus === "idle") {
     return (
       <div className={styles.screen}>
@@ -74,7 +73,7 @@ export default function VSCombat() {
             </div>
           </div>
           <button className={styles.readyBtn} onClick={handleReady} disabled={readySignaled}>
-            {readySignaled ? "✓ Listo" : "⚔️ ¡Listo para luchar!"}
+            {readySignaled ? "✓ Listo — esperando rival..." : "⚔️ ¡Listo para luchar!"}
           </button>
         </div>
       </div>
@@ -83,53 +82,61 @@ export default function VSCombat() {
 
   // ── PvP finished ──
   if (pvpStatus === "finished") {
-    const iWon = (myPvpState.hp ?? 0) > 0;
     return (
       <div className={styles.screen}>
         <div className={styles.vsHeader}>
-          <span className={styles.scoreChip}>{myScore} — {rivalScore}</span>
+          <span className={styles.scoreChip}>{iWon ? myScore : myScore} — {iWon ? rivalScore : rivalScore}</span>
           <span className={styles.vsLabel}>Resultado</span>
         </div>
         <div className={styles.resultScreen}>
           <div className={`${styles.resultBig} ${iWon ? styles.win : styles.lose}`}>
             {iWon ? "🏆 ¡Ganaste!" : "💀 Perdiste"}
           </div>
-          <div className={styles.pointsInfo}>
-            Marcador: <strong>{myScore}</strong> — <strong>{rivalScore}</strong>
-          </div>
-          <button className={styles.continueBtn} onClick={() => useGameStore.getState()._setState({ screen: "map" })}>
-            Continuar →
-          </button>
+          <div className={styles.pointsInfo}>Marcador: <strong>{vsScores[myUid] || 0}</strong> — <strong>{vsScores[rivalUid] || 0}</strong></div>
+          <button className={styles.continueBtn} onClick={handleContinue}>Continuar →</button>
         </div>
       </div>
     );
   }
 
   // ── Active PvP ──
+  const myHp = myPvpState.hp ?? player?.hp ?? 0;
+  const myMaxHp = myPvpState.maxHp ?? player?.maxHp ?? 1;
+  const myMp = myPvpState.mp ?? 0;
+  const myMaxMp = myPvpState.maxMp ?? 0;
+  const rivalHp = rivalPvpState.hp ?? 0;
+  const rivalMaxHp = rivalPvpState.maxHp ?? 1;
+  const rivalMp = rivalPvpState.mp ?? 0;
+  const rivalMaxMp = rivalPvpState.maxMp ?? 0;
+
   return (
     <div className={styles.screen}>
       {/* Score header */}
       <div className={styles.vsHeader}>
         <span className={styles.scoreChip}>{myScore} — {rivalScore}</span>
         <span className={styles.vsLabel}>⚔️ VS</span>
-        <span className={styles.regionLabel}>{region?.emoji}</span>
+        <span className={styles.regionLabel}>{region?.emoji} {region?.name}</span>
       </div>
 
       {/* MY panel */}
       <div className={`${styles.playerSection} ${isMyTurn ? styles.activeTurn : ""}`}>
-        <div className={styles.sectionLabel}>Tú {isMyTurn && <span className={styles.turnTag}>◀ Tu turno</span>}</div>
+        <div className={styles.sectionLabel}>
+          Tú {isMyTurn && <span className={styles.turnTag}>◀ Tu turno</span>}
+        </div>
         <div className={styles.champRow}>
-          <span className={styles.champEmoji}>{player?.champion?.emoji}</span>
+          {player?.champion?.iconUrl
+            ? <img src={player.champion.iconUrl} className={styles.champAvatar} alt="" />
+            : <span className={styles.champEmoji}>{player?.champion?.emoji}</span>}
           <div className={styles.champInfo}>
             <div className={styles.champName}>{player?.champion?.name}</div>
-            <div className={styles.hpText}>
-              ❤️ {Math.max(0, Math.ceil(myPvpState.hp ?? player?.hp ?? 0))} / {myPvpState.maxHp ?? player?.maxHp ?? 0}
-            </div>
+            <div className={styles.hpText}>❤️ {Math.max(0, Math.ceil(myHp))} / {myMaxHp}</div>
           </div>
         </div>
-        <div className={styles.hpBar}>
-          <div className={styles.hpFillMe} style={{ width: `${Math.max(0, ((myPvpState.hp ?? player?.hp ?? 0) / (myPvpState.maxHp ?? player?.maxHp ?? 1)) * 100)}%` }} />
-        </div>
+        <StatBar current={myHp} max={myMaxHp} type="hp" />
+        {myMaxMp > 0 && <StatBar current={myMp} max={myMaxMp} type={player?.resource === "energy" ? "energy" : "mp"} />}
+        {(player?.combatCtx?.playerShield > 0 || player?.combatCtx?.playerEvade > 0) && (
+          <EffectBadges combatCtx={player?.combatCtx} />
+        )}
         <div className={styles.inventory}>
           {(player?.inventory || []).map((item, i) => <InventorySlot key={i} item={item} index={i} />)}
           {Array.from({ length: Math.max(0, 6 - (player?.inventory?.length || 0)) }).map((_, i) => (
@@ -152,17 +159,16 @@ export default function VSCombat() {
           {!isMyTurn && <span className={styles.turnTag}>◀ Su turno</span>}
         </div>
         <div className={styles.champRow}>
-          <span className={styles.champEmoji}>{rivalData?.champion?.emoji || "👤"}</span>
+          {rivalData?.champion?.iconUrl
+            ? <img src={rivalData.champion.iconUrl} className={styles.champAvatar} alt="" />
+            : <span className={styles.champEmoji}>{rivalData?.champion?.emoji || "👤"}</span>}
           <div className={styles.champInfo}>
             <div className={styles.champName}>{rivalData?.champion?.name || "Rival"}</div>
-            <div className={styles.hpText}>
-              ❤️ {Math.max(0, Math.ceil(rivalPvpState.hp ?? 0))} / {rivalPvpState.maxHp ?? 0}
-            </div>
+            <div className={styles.hpText}>❤️ {Math.max(0, Math.ceil(rivalHp))} / {rivalMaxHp}</div>
           </div>
         </div>
-        <div className={styles.hpBar}>
-          <div className={styles.hpFillRival} style={{ width: `${Math.max(0, ((rivalPvpState.hp ?? 0) / (rivalPvpState.maxHp ?? 1)) * 100)}%` }} />
-        </div>
+        <StatBar current={rivalHp} max={rivalMaxHp} type="hp" />
+        {rivalMaxMp > 0 && <StatBar current={rivalMp} max={rivalMaxMp} type={rivalPvpState.resource === "energy" ? "energy" : "mp"} />}
         <div className={styles.inventory}>
           {(rivalPvpState.inventory || []).map((item, i) => <InventorySlot key={i} item={item} index={i} />)}
           {Array.from({ length: Math.max(0, 6 - (rivalPvpState.inventory?.length || 0)) }).map((_, i) => (
@@ -190,14 +196,19 @@ export default function VSCombat() {
             const cd = player?.abilityCooldowns?.[ab.key] || 0;
             const unlocked = player?.abilityUnlocked?.[ab.key] ?? (ab.key === "Q");
             const disabled = !isMyTurn || cd > 0 || !unlocked;
+            const imgUrl = abilityImages[ab.key];
             return (
               <button
                 key={ab.key}
                 className={`${styles.abilityBtn} ${disabled ? styles.disabled : ""}`}
                 onClick={() => !disabled && submitVsPvpAction(ab.key)}
                 disabled={disabled}
+                title={ab.gameplayName}
               >
-                <div className={`key-tag key-${ab.key.toLowerCase()}`}>{ab.key}</div>
+                {imgUrl
+                  ? <img src={imgUrl} className={styles.abilityImg} alt={ab.key} onError={e => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} />
+                  : null}
+                <div className={`key-tag key-${ab.key.toLowerCase()}`} style={imgUrl ? { display: "none" } : {}}>{ab.key}</div>
                 {cd > 0 && <div className={styles.cdOverlay}>{cd}</div>}
                 {!unlocked && <div className={styles.cdOverlay}>🔒</div>}
               </button>

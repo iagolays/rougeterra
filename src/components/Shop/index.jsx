@@ -11,9 +11,10 @@ import styles from "./Shop.module.css";
 
 export default function Shop() {
   const {
-    player, gold, bank, bankUsesLeft, regionIdx,
+    player, gold, bank, bankUsesLeft, regionIdx, gameMode,
     shopItems, buyItem, sellItem, depositBank, withdrawBank, leaveShop,
   } = useGameStore();
+  const bankDisabled = gameMode === "coop" || gameMode === "vs";
 
   const [bankInput, setBankInput] = useState("");
   const [bankMsg, setBankMsg]     = useState({ text: "", ok: true });
@@ -145,13 +146,16 @@ export default function Shop() {
             <div>
               <h3 className={styles.bankTitle}>🏦 Bank of Runeterra</h3>
               <p className={styles.bankSub}>
-                Gold in the bank is <strong>safe even if you die.</strong>{" "}
-                Gold on you is lost on defeat.
+                {bankDisabled
+                  ? <strong>🔒 El banco está bloqueado en modos multijugador.</strong>
+                  : <>Gold in the bank is <strong>safe even if you die.</strong> Gold on you is lost on defeat.</>}
               </p>
             </div>
-            <span className={`${styles.bankUses} ${noBankUses ? styles.bankUsesEmpty : ""}`}>
-              Transacciones: {bankUsesLeft}/2
-            </span>
+            {!bankDisabled && (
+              <span className={`${styles.bankUses} ${noBankUses ? styles.bankUsesEmpty : ""}`}>
+                Transacciones: {bankUsesLeft}/2
+              </span>
+            )}
           </div>
 
           <div className={styles.bankBalances}>
@@ -166,19 +170,21 @@ export default function Shop() {
             </div>
           </div>
 
-          <div className={styles.bankControls}>
-            <input
-              type="number"
-              className={styles.bankInput}
-              placeholder="Amount…"
-              value={bankInput}
-              min={0}
-              onChange={e => { setBankInput(e.target.value); setBankMsg({ text: "", ok: true }); }}
-              onKeyDown={e => e.key === "Enter" && handleDeposit()}
-            />
-            <button className="btn btn-gold" onClick={handleDeposit} disabled={noBankUses}>Deposit</button>
-            <button className="btn btn-outline" onClick={handleWithdraw} disabled={noBankUses}>Withdraw</button>
-          </div>
+          {!bankDisabled && (
+            <div className={styles.bankControls}>
+              <input
+                type="number"
+                className={styles.bankInput}
+                placeholder="Amount…"
+                value={bankInput}
+                min={0}
+                onChange={e => { setBankInput(e.target.value); setBankMsg({ text: "", ok: true }); }}
+                onKeyDown={e => e.key === "Enter" && handleDeposit()}
+              />
+              <button className="btn btn-gold" onClick={handleDeposit} disabled={noBankUses}>Deposit</button>
+              <button className="btn btn-outline" onClick={handleWithdraw} disabled={noBankUses}>Withdraw</button>
+            </div>
+          )}
 
           {bankMsg.text && (
             <p className={`${styles.bankMsg} ${bankMsg.ok ? styles.bankMsgOk : styles.bankMsgErr}`}>

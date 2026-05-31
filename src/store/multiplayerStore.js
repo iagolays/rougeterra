@@ -1,14 +1,11 @@
 /**
- * multiplayerStore.js
- * Gestiona lobbies, matchmaking y sincronización en tiempo real para modos Coop y VS.
+ * multiplayerStore.js — Gestión de lobbies, matchmaking y sincronización en tiempo real.
  * Arquitectura Host/Guest: el Host ejecuta la lógica de combate y escribe en Firestore.
- * El Guest envía acciones y lee resultados vía onSnapshot.
  */
 import { create } from "zustand";
 import {
   doc, getDoc, setDoc, updateDoc, onSnapshot,
-  collection, query, where, getDocs, deleteDoc,
-  serverTimestamp, runTransaction,
+  collection, query, where, getDocs, deleteDoc, serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuthStore } from "./authStore";
@@ -23,37 +20,61 @@ function generateCode() {
 }
 
 function playerSyncState(player) {
+  if (!player) return { hp: 100, maxHp: 100, mp: 0, maxMp: 0, itemStats: {}, armor: 0, mr: 0, ad: 20, ap: 0, effects: [], inventory: [] };
   return {
     hp: player.hp,
     maxHp: player.maxHp,
-    mp: player.mp,
-    maxMp: player.maxMp,
+    mp: player.mp || 0,
+    maxMp: player.maxMp || 0,
     itemStats: player.itemStats || {},
-    armor: player.armor,
-    mr: player.mr,
-    ad: player.ad,
-    ap: player.ap,
+    armor: player.armor || 0,
+    mr: player.mr || 0,
+    ad: player.ad || 20,
+    ap: player.ap || 0,
     effects: [],
+    resource: player.resource,
     champion: {
-      name: player.champion.name,
-      emoji: player.champion.emoji,
-      iconUrl: player.champion.iconUrl || null,
-      abilities: player.champion.abilities,
+      name: player.champion?.name,
+      emoji: player.champion?.emoji,
+      iconUrl: player.champion?.iconUrl || null,
+      abilityImages: player.champion?.abilityImages || {},
+      abilities: player.champion?.abilities || [],
       resource: player.resource,
     },
     inventory: player.inventory || [],
   };
 }
 
-// ─── Store ──────────────────────────────────────────────────────────────────
+function buildLobbyData(mode, hostUser, hostUid, guestUid, guestData) {
+  return {
+    mode,
+    status: "waiting",
+    host: hostUid,
+    createdAt: serverTimestamp(),
+    players: {
+      [hostUid]: { displayName: hostUser.displayName, photoURL: hostUser.photoURL || null, champion: null, playerSync: null },
+      [guestUid]: { displayName: guestData.displayName, photoURL: guestData.photoURL || null, champion: null, playerSync: null },
+    },
+    coopGold: 200,
+    coopRegionIdx: 0,
+    coopCombatIndex: 0,
+    coopCombat: { status: "idle", readyToFight: {}, activePlayerUid: hostUid, firstAttackerUid: hostUid, playerStates: {}, enemies: [], combatCtx: null, combatLogTail: [], pendingAction: null },
+    vsScores: { [hostUid]: 0, [guestUid]: 0 },
+    vsState: {},
+    vsPvpCombat: { status: "idle", turnUid: hostUid, pvpRound: 0, playerStates: {}, logTail: [], pendingAction: null },
+  };
+}
 
+// ─── Module-level subscriptions ─────────────────────────────────────────────
 let unsubLobby = null;
+let unsubMatchmaking = null;
 
+// ─── Store ──────────────────────────────────────────────────────────────────
 export const useMultiplayerStore = create((set, get) => ({
   lobbyCode: null,
   lobby: null,
   isHost: false,
-  matchmakingStatus: "idle", // "idle" | "searching" | "found"
+  matchmakingStatus: "idle",
   error: null,
   vsConsecutiveWins: 0,
 
@@ -64,30 +85,13 @@ export const useMultiplayerStore = create((set, get) => ({
     if (!user) return;
 
     let code = generateCode();
-    // Ensure unique code
     let snap = await getDoc(doc(db, "lobbies", code));
     while (snap.exists()) { code = generateCode(); snap = await getDoc(doc(db, "lobbies", code)); }
 
-    const lobbyData = {
-      mode,
-      status: "waiting",
-      host: user.uid,
-      createdAt: serverTimestamp(),
-      players: {
-        [user.uid]: {
-          displayName: user.displayName,
-          photoURL: user.photoURL || null,
-          champion: null,
-          readyToFight: false,
-        },
-      },
-      coopGold: 200,
-      coopRegionIdx: 0,
-      coopCombatIndex: 0,
-      coopCombat: { status: "idle", readyToFight: {}, activePlayerUid: user.uid, firstAttackerUid: user.uid, playerStates: {}, enemies: [], combatCtx: null, combatLogTail: [], pendingAction: null },
-      vsScores: { [user.uid]: 0 },
-      vsPvpCombat: { status: "idle", turnUid: user.uid, pvpRound: 0, playerStates: {}, logTail: [], pendingAction: null },
-    };
+    const lobbyData = buildLobbyData(mode, user, user.uid, "__placeholder__", { displayName: "", photoURL: null });
+    // Remove the placeholder
+    delete lobbyData.players["__placeholder__"];
+    delete lobbyData.vsScores["__placeholder__"];
 
     await setDoc(doc(db, "lobbies", code), lobbyData);
     set({ lobbyCode: code, isHost: true, error: null });
@@ -99,15 +103,16 @@ export const useMultiplayerStore = create((set, get) => ({
   joinByCode: async (code) => {
     const { user } = useAuthStore.getState();
     if (!user) return;
+    set({ error: null });
     const upper = code.trim().toUpperCase();
     const snap = await getDoc(doc(db, "lobbies", upper));
     if (!snap.exists()) { set({ error: "Código no encontrado." }); return; }
     const data = snap.data();
     if (data.status !== "waiting") { set({ error: "Esta sala ya no está disponible." }); return; }
-    if (Object.keys(data.players).length >= 2) { set({ error: "La sala está llena." }); return; }
+    if (Object.keys(data.players || {}).length >= 2) { set({ error: "La sala está llena." }); return; }
 
     await updateDoc(doc(db, "lobbies", upper), {
-      [`players.${user.uid}`]: { displayName: user.displayName, photoURL: user.photoURL || null, champion: null, readyToFight: false },
+      [`players.${user.uid}`]: { displayName: user.displayName, photoURL: user.photoURL || null, champion: null, playerSync: null },
       [`vsScores.${user.uid}`]: 0,
     });
 
@@ -117,7 +122,7 @@ export const useMultiplayerStore = create((set, get) => ({
     useGameStore.getState()._setState({ screen: "lobby" });
   },
 
-  // ── Matchmaking ─────────────────────────────────────────────────────────
+  // ── Matchmaking (sin runTransaction — usa onSnapshot + UID determinista) ──
 
   joinMatchmaking: async (mode) => {
     const { user } = useAuthStore.getState();
@@ -129,78 +134,66 @@ export const useMultiplayerStore = create((set, get) => ({
       mode,
       displayName: user.displayName,
       photoURL: user.photoURL || null,
-      timestamp: serverTimestamp(),
+      timestamp: Date.now(),
       lobbyCode: null,
     });
 
-    // Try to find a match using a transaction
-    const q = query(collection(db, "matchmaking"), where("mode", "==", mode));
-    let matched = false;
+    // Escucha la colección de matchmaking para este modo
+    if (unsubMatchmaking) unsubMatchmaking();
+    unsubMatchmaking = onSnapshot(
+      query(collection(db, "matchmaking"), where("mode", "==", mode)),
+      async (snap) => {
+        // ¿Ya me emparejaron? (alguien escribió lobbyCode en mi entrada)
+        const myDoc = snap.docs.find(d => d.id === user.uid);
+        const existingCode = myDoc?.data()?.lobbyCode;
+        if (existingCode) {
+          unsubMatchmaking?.();
+          unsubMatchmaking = null;
+          try { await deleteDoc(myRef); } catch {}
+          set({ lobbyCode: existingCode, isHost: false, matchmakingStatus: "found" });
+          get()._subscribeLobby(existingCode);
+          useGameStore.getState().setGameMode(mode);
+          useGameStore.getState()._setState({ screen: "lobby" });
+          return;
+        }
 
-    try {
-      await runTransaction(db, async (tx) => {
-        const qSnap = await getDocs(q);
-        const others = qSnap.docs.filter(d => d.id !== user.uid && !d.data().lobbyCode);
-        if (others.length === 0) return; // No match yet
+        // Busco rivales esperando sin lobby asignado
+        const others = snap.docs.filter(d => d.id !== user.uid && !d.data().lobbyCode);
+        if (others.length === 0) return;
 
+        // UID más bajo crea el lobby (evita que ambos creen a la vez)
         const other = others[0];
-        const otherUid = other.id;
-        const otherData = other.data();
+        if (user.uid > other.id) return;
 
-        // Create lobby
+        // Creo el lobby
         let code = generateCode();
-        let lobbySnap = await tx.get(doc(db, "lobbies", code));
-        while (lobbySnap.exists()) { code = generateCode(); lobbySnap = await tx.get(doc(db, "lobbies", code)); }
+        let lobbySnap = await getDoc(doc(db, "lobbies", code));
+        while (lobbySnap.exists()) { code = generateCode(); lobbySnap = await getDoc(doc(db, "lobbies", code)); }
 
-        const lobbyData = {
-          mode,
-          status: "waiting",
-          host: user.uid,
-          createdAt: serverTimestamp(),
-          players: {
-            [user.uid]: { displayName: user.displayName, photoURL: user.photoURL || null, champion: null, readyToFight: false },
-            [otherUid]: { displayName: otherData.displayName, photoURL: otherData.photoURL || null, champion: null, readyToFight: false },
-          },
-          coopGold: 200,
-          coopRegionIdx: 0,
-          coopCombatIndex: 0,
-          coopCombat: { status: "idle", readyToFight: {}, activePlayerUid: user.uid, firstAttackerUid: user.uid, playerStates: {}, enemies: [], combatCtx: null, combatLogTail: [], pendingAction: null },
-          vsScores: { [user.uid]: 0, [otherUid]: 0 },
-          vsPvpCombat: { status: "idle", turnUid: user.uid, pvpRound: 0, playerStates: {}, logTail: [], pendingAction: null },
-        };
+        const otherData = other.data();
+        const otherUid = other.id;
+        const lobbyData = buildLobbyData(mode, user, user.uid, otherUid, otherData);
+        await setDoc(doc(db, "lobbies", code), lobbyData);
 
-        tx.set(doc(db, "lobbies", code), lobbyData);
-        tx.update(doc(db, "matchmaking", otherUid), { lobbyCode: code });
-        tx.update(myRef, { lobbyCode: code });
-        matched = true;
-      });
-    } catch {}
+        // Asigno el lobby a ambas entradas de matchmaking
+        await updateDoc(myRef, { lobbyCode: code });
+        try { await updateDoc(doc(db, "matchmaking", otherUid), { lobbyCode: code }); } catch {}
 
-    if (matched) {
-      // We created the lobby — read our updated doc to get the code
-      const mySnap = await getDoc(myRef);
-      const code = mySnap.data()?.lobbyCode;
-      if (code) { await deleteDoc(myRef); set({ lobbyCode: code, isHost: true, matchmakingStatus: "found" }); get()._subscribeLobby(code); useGameStore.getState().setGameMode(mode); useGameStore.getState()._setState({ screen: "lobby" }); return; }
-    }
-
-    // We're waiting — watch our entry for a lobbyCode assigned by someone else
-    const unsubMM = onSnapshot(myRef, async (snap) => {
-      const code = snap.data()?.lobbyCode;
-      if (code) {
-        unsubMM();
-        await deleteDoc(myRef);
-        set({ lobbyCode: code, isHost: false, matchmakingStatus: "found" });
+        unsubMatchmaking?.();
+        unsubMatchmaking = null;
+        try { await deleteDoc(myRef); } catch {}
+        set({ lobbyCode: code, isHost: true, matchmakingStatus: "found" });
         get()._subscribeLobby(code);
         useGameStore.getState().setGameMode(mode);
         useGameStore.getState()._setState({ screen: "lobby" });
       }
-    });
+    );
   },
 
   cancelMatchmaking: async () => {
     const { user } = useAuthStore.getState();
-    if (!user) return;
-    try { await deleteDoc(doc(db, "matchmaking", user.uid)); } catch {}
+    if (unsubMatchmaking) { unsubMatchmaking(); unsubMatchmaking = null; }
+    if (user) try { await deleteDoc(doc(db, "matchmaking", user.uid)); } catch {}
     set({ matchmakingStatus: "idle" });
   },
 
@@ -211,56 +204,80 @@ export const useMultiplayerStore = create((set, get) => ({
     unsubLobby = onSnapshot(doc(db, "lobbies", code), (snap) => {
       if (!snap.exists()) { set({ lobby: null, lobbyCode: null }); return; }
       const lobby = { id: snap.id, ...snap.data() };
-      const prev = get().lobby;
       set({ lobby });
 
       const { user } = useAuthStore.getState();
+      if (!user) return;
       const { isHost } = get();
+      const myUid = user.uid;
+      const gameScreen = useGameStore.getState().screen;
 
-      // Host processes pending coop actions
-      if (isHost && lobby.coopCombat?.pendingAction && lobby.coopCombat.pendingAction.uid !== user.uid) {
-        get()._processCoopAction(lobby.coopCombat.pendingAction, lobby);
-      }
-
-      // Host processes pending VS PvP actions
-      if (isHost && lobby.vsPvpCombat?.pendingAction && lobby.vsPvpCombat.pendingAction.uid !== user.uid) {
-        get()._processVsPvpAction(lobby.vsPvpCombat.pendingAction, lobby);
-      }
-
-      // Countdown logic (host-driven): when 2 players join, host starts countdown
-      if (isHost && lobby.status === "waiting" && Object.keys(lobby.players).length === 2 && !lobby.countdownStartedAt) {
+      // ── Host: cuenta atrás cuando llegan 2 jugadores ──
+      if (isHost && lobby.status === "waiting" && Object.keys(lobby.players || {}).length === 2 && !lobby.countdownStartedAt) {
         updateDoc(doc(db, "lobbies", code), { status: "countdown", countdownStartedAt: Date.now() });
       }
 
-      // Screen transitions based on lobby status
-      const gameScreen = useGameStore.getState().screen;
-      if (lobby.status === "champion_select" && gameScreen === "lobby") {
-        // Stay on lobby screen — Lobby component renders champion select UI
-      }
+      // ── Transición lobby → mapa cuando ambos eligen campeón ──
       if (lobby.status === "playing" && gameScreen === "lobby") {
-        // Both chose champion — go to map (coop) or normal select flow for VS
-        const mode = lobby.mode;
-        if (mode === "coop") useGameStore.getState()._setState({ screen: "map" });
-        if (mode === "vs") useGameStore.getState()._setState({ screen: "map" });
+        useGameStore.getState()._setState({ screen: "map" });
+      }
+
+      // ── COOP: auto-llevar al compañero a coopcombat cuando uno señala listo ──
+      if (lobby.mode === "coop" && lobby.coopCombat?.readyToFight) {
+        const partnerUid = Object.keys(lobby.players || {}).find(u => u !== myUid);
+        const partnerReady = partnerUid && lobby.coopCombat.readyToFight[partnerUid];
+
+        if (partnerReady && gameScreen === "map") {
+          useGameStore.getState()._setState({ screen: "coopcombat" });
+        }
+
+        // Host: cuando ambos están listos, inicia el combate
+        const playerUids = Object.keys(lobby.players || {});
+        const allReady = playerUids.length === 2 && playerUids.every(uid => lobby.coopCombat.readyToFight[uid]);
+        if (isHost && allReady && lobby.coopCombat.status === "idle") {
+          get()._initCoopCombat(lobby);
+        }
+      }
+
+      // ── Host: procesa acción pendiente del guest en coop ──
+      if (isHost && lobby.coopCombat?.pendingAction && lobby.coopCombat.pendingAction.uid !== myUid) {
+        get()._processCoopAction(lobby.coopCombat.pendingAction, lobby);
+      }
+
+      // ── VS: cuando ambos están listos para PvP, el host inicia ──
+      if (lobby.mode === "vs" && lobby.vsState) {
+        const playerUids = Object.keys(lobby.players || {});
+        const allReadyPvP = playerUids.length === 2 && playerUids.every(uid => lobby.vsState?.[uid]?.readyForPvP);
+        if (isHost && allReadyPvP && lobby.vsPvpCombat?.status === "idle") {
+          get()._initVsPvp(lobby);
+        }
+      }
+
+      // ── Host: procesa acción pendiente del guest en PvP ──
+      if (isHost && lobby.vsPvpCombat?.pendingAction && lobby.vsPvpCombat.pendingAction.uid !== myUid) {
+        get()._processVsPvpAction(lobby.vsPvpCombat.pendingAction, lobby);
       }
     });
   },
 
   leaveLobby: async () => {
-    const { lobbyCode, lobby, isHost } = get();
+    const { lobbyCode, isHost } = get();
     const { user } = useAuthStore.getState();
-    if (!lobbyCode || !user) return;
-
     if (unsubLobby) { unsubLobby(); unsubLobby = null; }
-
-    if (isHost && lobby) {
-      await updateDoc(doc(db, "lobbies", lobbyCode), { status: "finished" });
-    } else if (lobby) {
-      const updated = { ...lobby.players };
-      delete updated[user.uid];
-      await updateDoc(doc(db, "lobbies", lobbyCode), { players: updated });
+    if (unsubMatchmaking) { unsubMatchmaking(); unsubMatchmaking = null; }
+    if (lobbyCode && user) {
+      try {
+        if (isHost) await updateDoc(doc(db, "lobbies", lobbyCode), { status: "finished" });
+        else {
+          const snap = await getDoc(doc(db, "lobbies", lobbyCode));
+          if (snap.exists()) {
+            const updated = { ...snap.data().players };
+            delete updated[user.uid];
+            await updateDoc(doc(db, "lobbies", lobbyCode), { players: updated });
+          }
+        }
+      } catch {}
     }
-
     set({ lobbyCode: null, lobby: null, isHost: false, matchmakingStatus: "idle" });
     useGameStore.getState().setGameMode("normal");
     useGameStore.getState()._setState({ screen: "home" });
@@ -273,69 +290,62 @@ export const useMultiplayerStore = create((set, get) => ({
     const { user } = useAuthStore.getState();
     if (!lobbyCode || !user) return;
 
-    // Set local champion in gameStore
     useGameStore.getState().selectChampion(champion);
-    // Override screen — stay in lobby flow
+    // selectChampion navigates to "map" — override to stay in lobby flow
+    useGameStore.getState()._setState({ screen: "lobby" });
+
     const localPlayer = useGameStore.getState().player;
+    const sync = playerSyncState(localPlayer);
 
     await updateDoc(doc(db, "lobbies", lobbyCode), {
-      [`players.${user.uid}.champion`]: {
-        id: champion.id,
-        name: champion.name,
-        emoji: champion.emoji,
-        iconUrl: champion.iconUrl || null,
-      },
-      [`players.${user.uid}.playerSync`]: playerSyncState(localPlayer || { hp: champion.stats.hp, maxHp: champion.stats.hp, mp: champion.stats.mp, maxMp: champion.stats.mp, itemStats: {}, armor: champion.stats.armor, mr: champion.stats.mr, ad: champion.stats.ad, ap: 0, inventory: [], champion, resource: champion.resource }),
+      [`players.${user.uid}.champion`]: { id: champion.id, name: champion.name, emoji: champion.emoji, iconUrl: champion.iconUrl || null },
+      [`players.${user.uid}.playerSync`]: sync,
     });
 
-    // Check if both players chose
-    const updatedLobby = { ...lobby, players: { ...lobby.players, [user.uid]: { ...lobby.players[user.uid], champion: { id: champion.id, name: champion.name, emoji: champion.emoji } } } };
-    const allChose = Object.values(updatedLobby.players).every(p => p.champion !== null);
+    // Si ambos eligieron, host pone status "playing"
+    const uids = Object.keys(lobby?.players || {});
+    const allChose = uids.length === 2 && uids.every(uid => uid === user.uid || lobby.players[uid]?.champion !== null);
     if (allChose && isHost) {
       await updateDoc(doc(db, "lobbies", lobbyCode), { status: "playing" });
     }
   },
 
-  // ── Coop: Fight button ──────────────────────────────────────────────────
+  // ── Coop: señalizar listo para combatir ────────────────────────────────
 
   signalReadyToFight: async () => {
     const { lobbyCode } = get();
     const { user } = useAuthStore.getState();
     if (!lobbyCode || !user) return;
+
+    // Actualizar playerSync con stats actuales antes de combatir
+    const localPlayer = useGameStore.getState().player;
     await updateDoc(doc(db, "lobbies", lobbyCode), {
       [`coopCombat.readyToFight.${user.uid}`]: true,
+      [`players.${user.uid}.playerSync`]: playerSyncState(localPlayer),
     });
-    // Check if host should start combat
-    const snap = await getDoc(doc(db, "lobbies", lobbyCode));
-    const lobby = snap.data();
-    const allReady = Object.keys(lobby.players).every(uid => lobby.coopCombat?.readyToFight?.[uid]);
-    if (allReady && get().isHost) {
-      get()._initCoopCombat(lobby);
-    }
+    // El listener _subscribeLobby detecta cuando ambos están listos y el host inicia el combate
   },
 
   _initCoopCombat: async (lobby) => {
     const { lobbyCode } = get();
-    const { user } = useAuthStore.getState();
     const regionIdx = lobby.coopRegionIdx || 0;
     const combatIndex = lobby.coopCombatIndex || 0;
     const region = REGIONS[regionIdx];
 
-    // Build enemy group
     const isBoss = (combatIndex + 1) % region.bossEvery === 0;
     const count = isBoss ? 1 : (combatIndex % 2 === 1 ? 2 : 1);
     const enemies = [];
     for (let i = 0; i < count; i++) enemies.push(getDifficultyScaledEnemy(region.id, combatIndex));
 
-    // Pick first attacker (alternates each combat)
     const uids = Object.keys(lobby.players);
     const firstAttacker = combatIndex % 2 === 0 ? uids[0] : uids[1];
+
     const localPlayer = useGameStore.getState().player;
-    const { player: initPlayer, combat: initCtx } = initCombat(localPlayer, enemies[0]);
+    const { combat: initCtx } = initCombat(localPlayer, enemies[0]);
 
     const playerStates = {};
     for (const [uid, pData] of Object.entries(lobby.players)) {
-      playerStates[uid] = pData.playerSync || { hp: 100, maxHp: 100, mp: 0, maxMp: 0, itemStats: {}, armor: 0, mr: 0, ad: 20, ap: 0, effects: [] };
+      playerStates[uid] = pData.playerSync || playerSyncState(null);
     }
 
     await updateDoc(doc(db, "lobbies", lobbyCode), {
@@ -347,29 +357,23 @@ export const useMultiplayerStore = create((set, get) => ({
         playerStates,
         enemies: enemies.map(e => ({ ...e, effects: [] })),
         combatCtx: initCtx,
-        combatLogTail: [{ type: "system", text: `⚔️ ¡Combate! ${isBoss ? "👑 BOSS" : ""}` }],
+        combatLogTail: [{ type: "system", text: `⚔️ ¡Combate! ${isBoss ? "👑 **BOSS**" : ""}` }],
         pendingAction: null,
       },
     });
   },
 
-  // ── Coop: Player action ─────────────────────────────────────────────────
+  // ── Coop: acción del jugador ────────────────────────────────────────────
 
   submitCoopAction: async (type, abilityKey = null) => {
     const { lobbyCode, lobby, isHost } = get();
     const { user } = useAuthStore.getState();
     if (!lobbyCode || !user) return;
-
     const action = { uid: user.uid, type, abilityKey, timestamp: Date.now() };
-
     if (isHost) {
-      // Host acts directly
       await get()._processCoopAction(action, lobby);
     } else {
-      // Guest submits action for host to process
-      await updateDoc(doc(db, "lobbies", lobbyCode), {
-        "coopCombat.pendingAction": action,
-      });
+      await updateDoc(doc(db, "lobbies", lobbyCode), { "coopCombat.pendingAction": action });
     }
   },
 
@@ -382,19 +386,16 @@ export const useMultiplayerStore = create((set, get) => ({
     const actingUid = action.uid;
     const uids = Object.keys(lobby.players);
     const otherUid = uids.find(u => u !== actingUid);
-
-    // Rebuild player for combat engine from synced state
-    const actingPState = cc.playerStates[actingUid];
+    const actingPState = cc.playerStates[actingUid] || {};
     const gamePlayer = useGameStore.getState().player;
 
-    // Use local player state if it's our turn, or reconstruct from sync for guest
     let playerForEngine = actingUid === user.uid
       ? gamePlayer
-      : { ...gamePlayer, hp: actingPState.hp, maxHp: actingPState.maxHp, mp: actingPState.mp, maxMp: actingPState.maxMp, armor: actingPState.armor, mr: actingPState.mr, ad: actingPState.ad, ap: actingPState.ap, itemStats: actingPState.itemStats };
+      : { ...gamePlayer, hp: actingPState.hp, maxHp: actingPState.maxHp, mp: actingPState.mp || 0, maxMp: actingPState.maxMp || 0, armor: actingPState.armor || 0, mr: actingPState.mr || 0, ad: actingPState.ad || 20, ap: actingPState.ap || 0, itemStats: actingPState.itemStats || {} };
 
-    const ability = gamePlayer.champion.abilities.find(a => a.key === action.abilityKey);
-    let combatCtx = cc.combatCtx;
-    let enemies = [...cc.enemies];
+    const ability = gamePlayer?.champion?.abilities?.find(a => a.key === action.abilityKey);
+    let combatCtx = { ...cc.combatCtx };
+    let enemies = [...(cc.enemies || [])];
     let logEntries = [];
 
     if (action.type === "ability" && ability) {
@@ -404,15 +405,13 @@ export const useMultiplayerStore = create((set, get) => ({
       enemies = [result.enemy, ...enemies.slice(1)];
       logEntries = result.log;
     } else if (action.type === "pass") {
-      // Simple pass - regenerate resource
       logEntries = [{ type: "system", text: `⏭️ ${actingPState.champion?.name || "Jugador"} pasa turno.` }];
     }
 
-    // Enemy turn — attacks the player who just acted
     const allDead = enemies.every(e => e.currentHp <= 0);
     let newPlayerStates = {
       ...cc.playerStates,
-      [actingUid]: { ...cc.playerStates[actingUid], hp: playerForEngine.hp, mp: playerForEngine.mp, effects: [] },
+      [actingUid]: { ...cc.playerStates[actingUid], hp: playerForEngine.hp, mp: playerForEngine.mp || 0 },
     };
 
     let victory = allDead;
@@ -424,42 +423,43 @@ export const useMultiplayerStore = create((set, get) => ({
       combatCtx = enemyResult.combat;
       enemies = [enemyResult.enemy, ...enemies.slice(1)];
       logEntries = [...logEntries, ...enemyResult.log];
-      newPlayerStates[actingUid] = { ...newPlayerStates[actingUid], hp: playerForEngine.hp, mp: playerForEngine.mp };
+      newPlayerStates[actingUid] = { ...newPlayerStates[actingUid], hp: playerForEngine.hp, mp: playerForEngine.mp || 0 };
       if (playerForEngine.hp <= 0) defeat = true;
     }
 
-    // Update host's local player if it was the host's turn
+    if (allDead || combatCtx.over) victory = true;
+
     if (actingUid === user.uid) {
       useGameStore.getState()._setState({ player: playerForEngine });
     }
 
-    // Switch active player
-    const nextUid = otherUid;
     const tail = [...(cc.combatLogTail || []), ...logEntries].slice(-30);
-
     const update = {
       "coopCombat.pendingAction": null,
       "coopCombat.enemies": enemies,
       "coopCombat.combatCtx": combatCtx,
       "coopCombat.playerStates": newPlayerStates,
       "coopCombat.combatLogTail": tail,
-      "coopCombat.activePlayerUid": nextUid,
+      "coopCombat.activePlayerUid": otherUid,
     };
 
     if (victory) update["coopCombat.status"] = "victory";
-    if (defeat) update["coopCombat.status"] = "defeat";
+    if (defeat)  update["coopCombat.status"] = "defeat";
 
     await updateDoc(doc(db, "lobbies", lobbyCode), update);
 
     if (victory) {
-      // Give gold reward + advance combat index
-      const goldReward = enemies[0]?.goldReward || 50;
-      const newGold = (lobby.coopGold || 200) + goldReward * 2;
+      const goldReward = (enemies[0]?.goldReward || 50) * 2;
+      const newGold = (lobby.coopGold || 200) + goldReward;
       const newIdx = (lobby.coopCombatIndex || 0) + 1;
-      await updateDoc(doc(db, "lobbies", lobbyCode), { coopGold: newGold, coopCombatIndex: newIdx, "coopCombat.readyToFight": {} });
-      useGameStore.getState()._setState({ screen: "reward" });
+      await updateDoc(doc(db, "lobbies", lobbyCode), {
+        coopGold: newGold,
+        coopCombatIndex: newIdx,
+        "coopCombat.readyToFight": {},
+        "coopCombat.status": "idle",
+      });
+      useGameStore.getState()._setState({ gold: newGold, screen: "reward" });
     }
-
     if (defeat) {
       useGameStore.getState()._setState({ screen: "gameover" });
     }
@@ -472,11 +472,11 @@ export const useMultiplayerStore = create((set, get) => ({
     const { user } = useAuthStore.getState();
     const localPlayer = useGameStore.getState().player;
     if (!lobbyCode || !user || !localPlayer) return;
-
     await updateDoc(doc(db, "lobbies", lobbyCode), {
       [`vsState.${user.uid}.readyForPvP`]: true,
       [`vsState.${user.uid}.playerState`]: playerSyncState(localPlayer),
     });
+    // El listener _subscribeLobby detecta cuando ambos están listos
   },
 
   submitVsPvpAction: async (abilityKey) => {
@@ -484,11 +484,8 @@ export const useMultiplayerStore = create((set, get) => ({
     const { user } = useAuthStore.getState();
     if (!lobbyCode || !user) return;
     const action = { uid: user.uid, abilityKey, timestamp: Date.now() };
-    if (isHost) {
-      await get()._processVsPvpAction(action, lobby);
-    } else {
-      await updateDoc(doc(db, "lobbies", lobbyCode), { "vsPvpCombat.pendingAction": action });
-    }
+    if (isHost) await get()._processVsPvpAction(action, lobby);
+    else await updateDoc(doc(db, "lobbies", lobbyCode), { "vsPvpCombat.pendingAction": action });
   },
 
   _processVsPvpAction: async (action, lobby) => {
@@ -501,33 +498,31 @@ export const useMultiplayerStore = create((set, get) => ({
     const uids = Object.keys(lobby.players);
     const targetUid = uids.find(u => u !== actingUid);
 
-    const attacker = pvp.playerStates[actingUid];
-    const defender = pvp.playerStates[targetUid];
+    const attacker = pvp.playerStates[actingUid] || {};
+    const defender = pvp.playerStates[targetUid] || {};
 
-    // Simple damage: AD minus defender armor (using existing formula)
     const { calculatePhysicalDamage, calculateMagicDamage } = await import("../game/combat");
     const gamePlayer = useGameStore.getState().player;
-    const ability = gamePlayer.champion.abilities.find(a => a.key === action.abilityKey);
+    const ability = gamePlayer?.champion?.abilities?.find(a => a.key === action.abilityKey);
 
     let dmg = 0;
     if (ability) {
-      if (ability.damageType === "adMult") dmg = calculatePhysicalDamage(attacker.ad * (ability.adMult || 1), defender.armor || 0);
+      if (ability.damageType === "adMult")      dmg = calculatePhysicalDamage(attacker.ad * (ability.adMult || 1), defender.armor || 0);
       else if (ability.damageType === "apMult") dmg = calculateMagicDamage(attacker.ap * (ability.apMult || 1), defender.mr || 0);
-      else dmg = calculatePhysicalDamage(attacker.ad, defender.armor || 0);
+      else if (ability.damageType === "trueDmg") dmg = Math.round(attacker.ad * (ability.adMult || 1));
+      else dmg = calculatePhysicalDamage(attacker.ad || 20, defender.armor || 0);
     } else {
-      dmg = calculatePhysicalDamage(attacker.ad, defender.armor || 0);
+      dmg = calculatePhysicalDamage(attacker.ad || 20, defender.armor || 0);
     }
+    dmg = Math.max(1, dmg);
 
-    const newDefenderHp = Math.max(0, defender.hp - dmg);
-    const logEntry = { type: "damage", text: `${attacker.champion?.emoji || "⚔️"} **${attacker.champion?.name}** → ${dmg} daño a **${defender.champion?.name}**` };
+    const newDefenderHp = Math.max(0, (defender.hp || 0) - dmg);
+    const logEntry = { type: "damage", text: `${attacker.champion?.emoji || "⚔️"} **${attacker.champion?.name || "?"}** → **${dmg}** daño a **${defender.champion?.name || "?"}**` };
 
-    const newStates = {
-      ...pvp.playerStates,
-      [targetUid]: { ...defender, hp: newDefenderHp },
-    };
-
+    const newStates = { ...pvp.playerStates, [targetUid]: { ...defender, hp: newDefenderHp } };
     const tail = [...(pvp.logTail || []), logEntry].slice(-30);
     const finished = newDefenderHp <= 0;
+
     const update = {
       "vsPvpCombat.pendingAction": null,
       "vsPvpCombat.playerStates": newStates,
@@ -537,34 +532,35 @@ export const useMultiplayerStore = create((set, get) => ({
 
     if (finished) {
       update["vsPvpCombat.status"] = "finished";
-      // Award point to winner
+      update["vsPvpCombat.winnerUid"] = actingUid;
       update[`vsScores.${actingUid}`] = (lobby.vsScores?.[actingUid] || 0) + 1;
 
-      // Check Rey de pista achievement
-      const { vsConsecutiveWins } = get();
+      // Rey de pista
       const myUid = user.uid;
+      const { vsConsecutiveWins } = get();
       const newStreak = actingUid === myUid ? vsConsecutiveWins + 1 : 0;
       set({ vsConsecutiveWins: newStreak });
       if (newStreak >= 3) useGameStore.getState().unlockAchievement("king_track");
 
-      // Check if this is the Void (last region) PvP — ends the game
-      const myStore = useGameStore.getState();
-      const isVoid = myStore.regionIdx >= 5;
+      // Reset vsState.readyForPvP para el próximo enfrentamiento
+      for (const uid of uids) { update[`vsState.${uid}.readyForPvP`] = false; }
+
+      // Void = enfrentamiento final
+      const isVoid = useGameStore.getState().regionIdx >= 5;
       if (isVoid) {
-        update[`vsState.${actingUid}.finalWinner`] = true;
-        useAuthStore.getState().updateLeaderboardStats("vsWins", 1);
         if (actingUid === myUid) {
+          useAuthStore.getState().updateLeaderboardStats("vsWins", 1);
           useGameStore.getState()._setState({ screen: "victory" });
         } else {
           useGameStore.getState()._setState({ screen: "gameover" });
         }
       }
+      // Para regiones no-Void, VSCombat muestra el resultado y el botón "Continuar"
+      // llama a proceedAfterCombat() para avanzar el combatIndex
     }
 
     await updateDoc(doc(db, "lobbies", lobbyCode), update);
   },
-
-  // ── VS: Init PvP ────────────────────────────────────────────────────────
 
   _initVsPvp: async (lobby) => {
     const { lobbyCode } = get();
@@ -572,20 +568,20 @@ export const useMultiplayerStore = create((set, get) => ({
     const pvpRound = lobby.vsPvpCombat?.pvpRound || 0;
     const firstTurnUid = pvpRound % 2 === 0 ? uids[0] : uids[1];
 
-    // Heal both to full, use their current synced stats
     const playerStates = {};
-    for (const [uid] of Object.entries(lobby.players)) {
+    for (const uid of uids) {
       const st = lobby.vsState?.[uid]?.playerState;
-      if (st) playerStates[uid] = { ...st, hp: st.maxHp };
+      if (st) playerStates[uid] = { ...st, hp: st.maxHp }; // curar al 100%
     }
 
     await updateDoc(doc(db, "lobbies", lobbyCode), {
       vsPvpCombat: {
         status: "active",
         turnUid: firstTurnUid,
+        winnerUid: null,
         pvpRound: pvpRound + 1,
         playerStates,
-        logTail: [{ type: "system", text: `⚔️ ¡Enfrentamiento PvP! Ronda ${pvpRound + 1}` }],
+        logTail: [{ type: "system", text: `⚔️ ¡Enfrentamiento! Ronda ${pvpRound + 1}` }],
         pendingAction: null,
       },
     });
@@ -595,6 +591,7 @@ export const useMultiplayerStore = create((set, get) => ({
 
   reset: () => {
     if (unsubLobby) { unsubLobby(); unsubLobby = null; }
+    if (unsubMatchmaking) { unsubMatchmaking(); unsubMatchmaking = null; }
     set({ lobbyCode: null, lobby: null, isHost: false, matchmakingStatus: "idle", error: null, vsConsecutiveWins: 0 });
   },
 }));

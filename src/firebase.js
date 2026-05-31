@@ -3,13 +3,13 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey:            "AIzaSyDPR-9NXCg1EC6XqV0xye86M6c4fM0t524",
+  authDomain:        "rogueterra.firebaseapp.com",
+  projectId:         "rogueterra",
+  storageBucket:     "rogueterra.firebasestorage.app",
+  messagingSenderId: "243436684082",
+  appId:             "1:243436684082:web:c13129789604ee89084d2b",
+  measurementId:     "G-HVBPVZTBK3",
 };
 
 const app = initializeApp(firebaseConfig);

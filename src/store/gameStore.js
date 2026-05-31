@@ -574,11 +574,9 @@ export const useGameStore = create(
     // Build enemy group: 1 enemy normally, 2 on even combat indices, boss always solo
     const isBossFight = (combatIndex + 1) % region.bossEvery === 0;
 
-    // VS mode: boss positions trigger PvP instead of CPU combat
-    if (gameMode === "vs" && isBossFight) {
-      set({ screen: "vscombat" });
-      return;
-    }
+    // Online modes: redirect to multiplayer combat screens
+    if (gameMode === "coop") { set({ screen: "coopcombat" }); return; }
+    if (gameMode === "vs" && isBossFight) { set({ screen: "vscombat" }); return; }
     const enemyCount = isBossFight ? 1 : (combatIndex % 2 === 1 ? 2 : 1);
 
     const rawEnemies = [];
@@ -1032,7 +1030,8 @@ export const useGameStore = create(
   },
 
   depositBank:  (amt) => {
-    const { gold, bank, bankUsesLeft } = get();
+    const { gold, bank, bankUsesLeft, gameMode } = get();
+    if (gameMode === "coop" || gameMode === "vs") return "disabled";
     if (bankUsesLeft <= 0) return "no-uses";
     const a = Math.min(amt, gold);
     if (a <= 0) return false;
@@ -1043,7 +1042,7 @@ export const useGameStore = create(
     try { import("./authStore").then(m => m.useAuthStore.getState().updateLeaderboardStats("bank", newBank)); } catch {}
     return true;
   },
-  withdrawBank: (amt) => { const { gold, bank, bankUsesLeft } = get(); if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, bank); if (a<=0) return false; set({ gold: gold+a, bank: bank-a, bankUsesLeft: bankUsesLeft-1 }); return true; },
+  withdrawBank: (amt) => { const { gold, bank, bankUsesLeft, gameMode } = get(); if (gameMode === "coop" || gameMode === "vs") return "disabled"; if (bankUsesLeft <= 0) return "no-uses"; const a = Math.min(amt, bank); if (a<=0) return false; set({ gold: gold+a, bank: bank-a, bankUsesLeft: bankUsesLeft-1 }); return true; },
   leaveShop:    () => set({ screen: "map" }),
 
   // ─── GAME OVER / RESTART ──────────────────────────────────────────────────
